@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.mrefive.freebay.MainActivity;
 import com.mrefive.freebay.OwnOffersDB.JSONtoLocalDB;
@@ -25,11 +26,10 @@ import java.net.URLEncoder;
  */
 public class DeleteOwnOfferFromServer extends AsyncTask <String, Void, Void> {
 
-    String JSON_STRING;
-    String receivedText;
 
-    String json_url;
-    String UUID;
+    private String json_url;
+    private String UUID;
+    private String UOID;
 
     private Context context;
 
@@ -38,7 +38,6 @@ public class DeleteOwnOfferFromServer extends AsyncTask <String, Void, Void> {
     public DeleteOwnOfferFromServer(Context context) {
         sharedPreferences = context.getSharedPreferences("com.mrefive.freebay", Context.MODE_PRIVATE);
 
-        json_url = "http://mrefive.bplaced.net/freeBay/json_get_data.php";
 
         this.context = context;
     }
@@ -53,7 +52,10 @@ public class DeleteOwnOfferFromServer extends AsyncTask <String, Void, Void> {
 
         //UUID = params[0];
         UUID = params[0];
-        Log.d("ServerToJSON", "UUID = " +UUID);
+        UOID = params[1];
+
+        json_url = "http://mrefive.bplaced.net/freeBay/deleteOwnOffer.php";
+
 
         try {
             //timer
@@ -64,37 +66,16 @@ public class DeleteOwnOfferFromServer extends AsyncTask <String, Void, Void> {
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setRequestMethod("POST");
             httpURLConnection.setDoOutput(true);
-            httpURLConnection.setDoInput(true);
-
-
-
             OutputStream OS = httpURLConnection.getOutputStream();
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(OS, "UTF-8"));
             String data =
-                    URLEncoder.encode("UUID", "UTF-8") +"="+ URLEncoder.encode(UUID, "UTF-8");
+                    URLEncoder.encode("UUID", "UTF-8") +"="+ URLEncoder.encode(UUID, "UTF-8")+"&"+
+                    URLEncoder.encode("UOID", "UTF-8") +"="+ URLEncoder.encode(UOID, "UTF-8");
             bufferedWriter.write(data);
             bufferedWriter.flush();
             bufferedWriter.close();
 
-            InputStream inputStream = httpURLConnection.getInputStream();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-            StringBuilder stringBuilder = new StringBuilder();
-
-
-            //stringbuilder saves all information from db
-
-
-            //request data from db into string
-            while ((JSON_STRING = bufferedReader.readLine()) != null) {
-                stringBuilder.append(JSON_STRING + "\n");
-
-            }
-
-            //close http connection
-            bufferedReader.close();
-            inputStream.close();
-
+            Log.d("DeleteOwnOfferFromSever", "Encoded String: " + data);
 
             OS.close();
 
@@ -102,9 +83,7 @@ public class DeleteOwnOfferFromServer extends AsyncTask <String, Void, Void> {
 
             //return data from db as string
 
-            Log.d("GetJSONforProfile", "Time to retrieve JSON data: " + (System.currentTimeMillis()-currentTime)/1000 + "s" );
-            Log.d("GetJSONforProfile", "JSON String: " +stringBuilder.toString().trim() );
-
+            Log.d("DeleteOwnOfferFromSever", "Own offer with UOID: " + (System.currentTimeMillis()-currentTime)/1000 + "s successfully deleted!" );
 
 
         } catch (MalformedURLException e) {
@@ -124,11 +103,10 @@ public class DeleteOwnOfferFromServer extends AsyncTask <String, Void, Void> {
     @Override
     public void onPostExecute(Void v) {
 
+        Toast.makeText(context,"Offer successfully deleted!", Toast.LENGTH_LONG).show();
+
 
     }
 
-    public void imadethemchangesoncarbon() {
-
-    }
 
 }

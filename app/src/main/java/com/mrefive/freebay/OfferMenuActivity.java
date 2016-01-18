@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mrefive.freebay.OwnOffersDB.DeleteOwnOfferFromServer;
 import com.mrefive.freebay.OwnOffersDB.OwnOffersDatabase;
 
 public class OfferMenuActivity extends Activity {
@@ -20,7 +21,7 @@ public class OfferMenuActivity extends Activity {
     private Bundle bundle;
     private int listViewPosition;
 
-    private String titleString, descrString, UOIDString;
+    private String titleString, descrString, UOIDString, UUIDString;
 
     private TextView title, descr;
     private Button deleteentry;
@@ -49,6 +50,7 @@ public class OfferMenuActivity extends Activity {
         Cursor cursor = ownOffersDatabase.getInformation(ownOffersDatabase);
         cursor.moveToPosition(listViewPosition);
 
+        UUIDString = cursor.getString(0);
         UOIDString = cursor.getString(1);
         titleString = cursor.getString(3);
         descrString = cursor.getString(4);
@@ -63,9 +65,16 @@ public class OfferMenuActivity extends Activity {
             @Override
             public void onClick(View v) {
 
+                //delte from local DB
                 ownOffersDatabase.deleteEntry(ownOffersDatabase, UOIDString);
 
-                Toast.makeText(context,"Entry removed", Toast.LENGTH_LONG);
+                //delete from server
+
+                DeleteOwnOfferFromServer deleteOwnOfferFromServer = new DeleteOwnOfferFromServer(context);
+                deleteOwnOfferFromServer.execute(UUIDString, UOIDString);
+
+
+                Toast.makeText(context,"Entry removed", Toast.LENGTH_LONG).show();
                 //end menuactivity
                 finish();
 
