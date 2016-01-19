@@ -31,6 +31,8 @@ public class DeleteOwnOfferFromServer extends AsyncTask <String, Void, Void> {
     private String UUID;
     private String UOID;
 
+    private int connectionSuccess;
+
     private Context context;
 
     SharedPreferences sharedPreferences;
@@ -44,7 +46,10 @@ public class DeleteOwnOfferFromServer extends AsyncTask <String, Void, Void> {
 
     @Override
     public void onPreExecute() {
+
         super.onPreExecute();
+
+        connectionSuccess=0;
     }
 
     @Override
@@ -64,8 +69,13 @@ public class DeleteOwnOfferFromServer extends AsyncTask <String, Void, Void> {
             //post info
             URL url = new URL(json_url);
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+
             httpURLConnection.setRequestMethod("POST");
             httpURLConnection.setDoOutput(true);
+
+
+
+
             OutputStream OS = httpURLConnection.getOutputStream();
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(OS, "UTF-8"));
             String data =
@@ -78,6 +88,9 @@ public class DeleteOwnOfferFromServer extends AsyncTask <String, Void, Void> {
             Log.d("DeleteOwnOfferFromSever", "Encoded String: " + data);
 
             OS.close();
+
+            connectionSuccess = httpURLConnection.getResponseCode();
+            Log.d("Delete_own_offer_server", "URL connection response code:" + httpURLConnection.getResponseCode());
 
             httpURLConnection.disconnect();
 
@@ -103,8 +116,9 @@ public class DeleteOwnOfferFromServer extends AsyncTask <String, Void, Void> {
     @Override
     public void onPostExecute(Void v) {
 
-        Toast.makeText(context,"Offer successfully deleted!", Toast.LENGTH_LONG).show();
-
+        if(connectionSuccess==200) {
+            Toast.makeText(context, "Offer successfully deleted!", Toast.LENGTH_LONG).show();
+        }
 
     }
 
