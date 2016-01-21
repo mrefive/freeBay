@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/abc_list_pressed_holo_dark">
+    android:background="@android:drawable/dialog_holo_light_frame">
 
     <TextView
         android:layout_width="wrap_content"

@@ -19,4 +19,24 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="offermenutitletitle">Title</string>
     <string name="offermenudescrtitle">Description</string>
+
+
+    <!-- Dialog Strings -->
+    <string name="dialogok">OK</string>
+    <string name="dialogcancel">Cancel</string>
+    <string name="timeduedialogtitle">Set Time and Date</string>
+
+    <!-- fagment_offer.xml Strings -->
+    <string name="tVtitletitle">Enter a title</string>
+    <string name="tVdescrtitle">Describe your offer</string>
+    <string name="tVdatetitle">End date</string>
+
+    <string name="tVfillerTitle">How to place an order:</string>
+    <string name="tVfiller1">Take a picture of your offer by touching the camera icon</string>
+    <string name="tVfiller2">Chose a category and fill the forms</string>
+    <string name="tVfiller3">Submit your order and wait for a happy taker</string>
+
+
+
+
 </resources>

@@ -40,12 +40,14 @@
                     android:id="@+id/offermenutitle"
                     android:layout_alignParentTop="false"
                     android:layout_centerHorizontal="true"
-                    android:textSize="20dp"
+                    android:textSize="16dp"
                     android:layout_below="@+id/offermenutitletitle"
                     android:layout_marginLeft="10dp"
                     android:layout_marginTop="5dp"
                     android:layout_marginRight="5dp"
-                    android:layout_marginBottom="5dp" />
+                    android:layout_marginBottom="5dp"
+                    android:textColor="#FF282828"
+                    android:textStyle="normal" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -63,12 +65,13 @@
                     android:id="@+id/offermenudescr"
                     android:layout_below="@+id/offermenudescrtitle"
                     android:layout_centerHorizontal="true"
-                    android:textSize="20dp"
+                    android:textSize="16dp"
                     android:layout_marginLeft="10dp"
                     android:layout_marginTop="5dp"
                     android:textAlignment="gravity"
                     android:layout_marginRight="5dp"
-                    android:layout_marginBottom="5dp" />
+                    android:layout_marginBottom="5dp"
+                    android:textColor="#282828" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -93,10 +96,10 @@
                 android:textSize="20dp"
                 android:textColor="#c3c3c3"
                 android:background="#af1212"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:layout_marginBottom="20dp" />
+                android:layout_marginBottom="10dp" />
         </RelativeLayout>
     </ScrollView>
 

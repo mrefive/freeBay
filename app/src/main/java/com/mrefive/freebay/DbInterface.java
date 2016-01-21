@@ -52,10 +52,9 @@ public class DbInterface extends AsyncTask<String, Void, String> {
             String descriptions = params[4];
             String timeput = params[5];
             String dateput = params[6];
-            String timedue = params[7];
-            String datedue = params[8];
-            String lat = params[9];
-            String lng = params[10];
+            String datedue = params[7];
+            String lat = params[8];
+            String lng = params[9];
 
             Log.d("DbInterface", category);
 
@@ -74,7 +73,6 @@ public class DbInterface extends AsyncTask<String, Void, String> {
                         URLEncoder.encode("descr", "UTF-8") +"="+ URLEncoder.encode(descriptions, "UTF-8")+"&"+
                         URLEncoder.encode("timeput", "UTF-8") +"="+ URLEncoder.encode(timeput, "UTF-8")+"&"+
                         URLEncoder.encode("dateput", "UTF-8") +"="+ URLEncoder.encode(dateput, "UTF-8")+"&"+
-                        URLEncoder.encode("timedue", "UTF-8") +"="+ URLEncoder.encode(timedue, "UTF-8")+"&"+
                         URLEncoder.encode("datedue", "UTF-8") +"="+ URLEncoder.encode(datedue, "UTF-8")+"&"+
                         URLEncoder.encode("lat", "UTF-8") +"="+ URLEncoder.encode(lat, "UTF-8")+"&"+
                         URLEncoder.encode("lng", "UTF-8") +"="+URLEncoder.encode(lng, "UTF-8");

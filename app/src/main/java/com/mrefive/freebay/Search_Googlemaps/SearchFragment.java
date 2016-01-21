@@ -198,7 +198,6 @@ public class SearchFragment extends Fragment implements OnMapReadyCallback {
                     descr = JO.getString("descr");
                     timeput= JO.getString("timeput");
                     dateput = JO.getString("dateput");
-                    timedue = JO.getString("timedue");
                     datedue = JO.getString("datedue");
                     lati = JO.getString("lat");
                     lngi = JO.getString("lng");

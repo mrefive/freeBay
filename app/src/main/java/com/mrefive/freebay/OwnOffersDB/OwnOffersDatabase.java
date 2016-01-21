@@ -17,7 +17,7 @@ public class OwnOffersDatabase extends SQLiteOpenHelper {
 
 
     private String CREATE_QUERY_OLD = "CREATE TABLE "+ OwnOffersTableInfo.TableInfo.TABLE_NAME+ "("+ OwnOffersTableInfo.TableInfo.TITLE+" TEXT,"+ OwnOffersTableInfo.TableInfo.DESCR+" TEXT);";
-    private String CREATE_QUERY = "CREATE TABLE "+ OwnOffersTableInfo.TableInfo.TABLE_NAME+ "("+ OwnOffersTableInfo.TableInfo.UUID+" TEXT,"+ OwnOffersTableInfo.TableInfo.UOID+" TEXT,"+ OwnOffersTableInfo.TableInfo.CATEGORY+" TEXT,"+ OwnOffersTableInfo.TableInfo.TITLE+" TEXT,"+ OwnOffersTableInfo.TableInfo.DESCR+" TEXT,"+ OwnOffersTableInfo.TableInfo.TIMEPUT+" TEXT,"+ OwnOffersTableInfo.TableInfo.DATEPUT+" TEXT,"+ OwnOffersTableInfo.TableInfo.TIMEDUE+" TEXT,"+ OwnOffersTableInfo.TableInfo.DATEDUE+" TEXT,"+ OwnOffersTableInfo.TableInfo.LAT+" TEXT,"+ OwnOffersTableInfo.TableInfo.LNG+" TEXT);";
+    private String CREATE_QUERY = "CREATE TABLE "+ OwnOffersTableInfo.TableInfo.TABLE_NAME+ "("+ OwnOffersTableInfo.TableInfo.UUID+" TEXT,"+ OwnOffersTableInfo.TableInfo.UOID+" TEXT,"+ OwnOffersTableInfo.TableInfo.CATEGORY+" TEXT,"+ OwnOffersTableInfo.TableInfo.TITLE+" TEXT,"+ OwnOffersTableInfo.TableInfo.DESCR+" TEXT,"+ OwnOffersTableInfo.TableInfo.TIMEPUT+" TEXT,"+ OwnOffersTableInfo.TableInfo.DATEPUT+" TEXT,"+ OwnOffersTableInfo.TableInfo.DATEDUE+" TEXT,"+ OwnOffersTableInfo.TableInfo.LAT+" TEXT,"+ OwnOffersTableInfo.TableInfo.LNG+" TEXT);";
 
 
     public OwnOffersDatabase(Context context) {
@@ -40,7 +40,7 @@ public class OwnOffersDatabase extends SQLiteOpenHelper {
 
     }
 
-    public void putInformation(OwnOffersDatabase ownOffersDatabase, String UUID, String UOID, String category,String title,String descr,String timeput,String dateput,String timedue,String datedue,String lat,String lng) {
+    public void putInformation(OwnOffersDatabase ownOffersDatabase, String UUID, String UOID, String category,String title,String descr,String timeput,String dateput,String datedue,String lat,String lng) {
 
         SQLiteDatabase sqLiteDatabase = ownOffersDatabase.getWritableDatabase();
 
@@ -55,7 +55,6 @@ public class OwnOffersDatabase extends SQLiteOpenHelper {
         contentValues.put(OwnOffersTableInfo.TableInfo.DESCR, descr);
         contentValues.put(OwnOffersTableInfo.TableInfo.TIMEPUT, timeput);
         contentValues.put(OwnOffersTableInfo.TableInfo.DATEPUT, dateput);
-        contentValues.put(OwnOffersTableInfo.TableInfo.TIMEDUE, timedue);
         contentValues.put(OwnOffersTableInfo.TableInfo.DATEDUE, datedue);
         contentValues.put(OwnOffersTableInfo.TableInfo.LAT, lat);
         contentValues.put(OwnOffersTableInfo.TableInfo.LNG, lng);
@@ -92,7 +91,7 @@ public class OwnOffersDatabase extends SQLiteOpenHelper {
     public Cursor getInformation(OwnOffersDatabase ownOffersDatabase) {
         SQLiteDatabase sqLiteDatabase = ownOffersDatabase.getReadableDatabase();
         //String[] columns = {OwnOffersTableInfo.TableInfo.TITLE, OwnOffersTableInfo.TableInfo.DESCR};
-        String[] columns = {OwnOffersTableInfo.TableInfo.UUID, OwnOffersTableInfo.TableInfo.UOID, OwnOffersTableInfo.TableInfo.CATEGORY, OwnOffersTableInfo.TableInfo.TITLE, OwnOffersTableInfo.TableInfo.DESCR, OwnOffersTableInfo.TableInfo.TIMEPUT, OwnOffersTableInfo.TableInfo.DATEPUT, OwnOffersTableInfo.TableInfo.TIMEDUE, OwnOffersTableInfo.TableInfo.DATEDUE, OwnOffersTableInfo.TableInfo.LAT, OwnOffersTableInfo.TableInfo.LNG};
+        String[] columns = {OwnOffersTableInfo.TableInfo.UUID, OwnOffersTableInfo.TableInfo.UOID, OwnOffersTableInfo.TableInfo.CATEGORY, OwnOffersTableInfo.TableInfo.TITLE, OwnOffersTableInfo.TableInfo.DESCR, OwnOffersTableInfo.TableInfo.TIMEPUT, OwnOffersTableInfo.TableInfo.DATEPUT, OwnOffersTableInfo.TableInfo.DATEDUE, OwnOffersTableInfo.TableInfo.LAT, OwnOffersTableInfo.TableInfo.LNG};
         Cursor cursor = sqLiteDatabase.query(OwnOffersTableInfo.TableInfo.TABLE_NAME, columns, null, null, null, null, null);
 
         return cursor;

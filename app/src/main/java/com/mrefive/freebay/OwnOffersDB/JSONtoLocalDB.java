@@ -44,7 +44,7 @@ public class JSONtoLocalDB {
             jsonArray = jsonObject.getJSONArray("server_response");
 
             int count = 0;
-            String UUID, UOID, category, title, descr, timeput, dateput, timedue, datedue, lat, lng;
+            String UUID, UOID, category, title, descr, timeput, dateput, datedue, lat, lng;
 
             while(count<jsonArray.length()) {
                 JSONObject JO = jsonArray.getJSONObject(count);
@@ -55,13 +55,12 @@ public class JSONtoLocalDB {
                 descr = JO.getString("descr");
                 timeput= JO.getString("timeput");
                 dateput = JO.getString("dateput");
-                timedue = JO.getString("timedue");
                 datedue = JO.getString("datedue");
                 lat = JO.getString("lat");
                 lng = JO.getString("lng");
 
 
-                ownOffersDatabase.putInformation(ownOffersDatabase, UUID, UOID, category, title, descr, timeput, dateput, timedue, datedue, lat, lng);
+                ownOffersDatabase.putInformation(ownOffersDatabase, UUID, UOID, category, title, descr, timeput, dateput, datedue, lat, lng);
 
                 count++;
 

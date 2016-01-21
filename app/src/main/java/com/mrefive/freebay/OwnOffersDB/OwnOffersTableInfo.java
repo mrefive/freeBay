@@ -19,7 +19,6 @@ public class OwnOffersTableInfo {
         public static String DESCR = "descr";
         public static String TIMEPUT = "timeput";
         public static String DATEPUT = "timedue";
-        public static String TIMEDUE = "dateput";
         public static String DATEDUE = "datedue";
         public static String LAT = "lat";
         public static String LNG = "lng";

@@ -2,6 +2,8 @@ package com.mrefive.freebay;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
@@ -12,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
+import android.view.Window;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -53,10 +56,19 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //window options
+        //getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
+
         sharedPreferences = this.getSharedPreferences("com.mrefive.freebay", this.MODE_PRIVATE);
+
+
+
 
         //getLatLng
         gpsTracker = new GPSTracker(this);
@@ -83,6 +95,9 @@ public class MainActivity extends AppCompatActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        //getActionBar().setStackedBackgroundDrawable(new ColorDrawable(Color.parseColor("#55000000")));
+
 
         //save Android ID
         ANDROID_ID = Settings.Secure.getString(this.getContentResolver(),

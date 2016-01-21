@@ -1,13 +1,18 @@
 package com.mrefive.freebay;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -25,7 +31,10 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TextClock;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -50,15 +59,24 @@ public class OfferFragment extends Fragment {
     int containerWidth, containerHeight;
     private int countOfPosts;
 
-    private String name, description;
+    private String name, description, datecontrol;
 
-    //layouts
+    //instances
+
+
+    //views
     private ImageButton imagebuttonCamera;
-    private LinearLayout linearLayoutOfferFrag;
-
+    private RelativeLayout relativeLayoutOfferFrag, offerimagecontainer;
     private EditText title, descr, time, date;
     private Button submitButton;
     private Spinner categoriesSpinner;
+    private TextClock textClock;
+    private TimePicker tp;
+    private DatePicker dp;
+    private TextView showDate;
+
+
+    private DatePickerDialog dpd;
 
 
     /*
@@ -93,6 +111,8 @@ public class OfferFragment extends Fragment {
         //getCalendar
         calendar = Calendar.getInstance();
 
+
+
         System.out.println("-------------------------OfferFragment2 container size hxw: " + containerHeight + "x" + containerWidth);
 
 
@@ -105,7 +125,8 @@ public class OfferFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_offer, container, false);
 
         //create cameraimageview
-        linearLayoutOfferFrag = (LinearLayout) view.findViewById(R.id.LinLayOfferFragment);
+        relativeLayoutOfferFrag = (RelativeLayout) view.findViewById(R.id.LinLayOfferFragment);
+        offerimagecontainer = (RelativeLayout) view.findViewById(R.id.offerimagecontainer);
 
         imagebuttonCamera = (ImageButton) view.findViewById(R.id.buttonGetPicture);
         categoriesSpinner = (Spinner) view.findViewById(R.id.categoriesSpinner);
@@ -115,18 +136,28 @@ public class OfferFragment extends Fragment {
         date = (EditText) view.findViewById(R.id.eTDate);
         submitButton = (Button) view.findViewById(R.id.submitOffer);
 
-        imagebuttonCamera.setBackgroundResource(R.drawable.camera);
+        showDate = (TextView) view.findViewById(R.id.showDateDue);
+
+        //hide keyboard
+        InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
 
         //define spinner items
-        String[] items = new String[]{"Chose category", "Food", "Toys", "Cloths", "Essentials", "Other"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_dropdown_item, items);
+        String[] items = new String[]{"Chose a category", "Food", "Toys", "Cloths", "Essentials", "Other"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), R.layout.categories_dropdown, items);
         categoriesSpinner.setAdapter(adapter);
 
-        title.setHint("What do you offer?");
-        descr.setHint("Describe your offer here");
         time.setHint("Set Ending Time");
         date.setHint("Set Ending Date");
+        title.setHint("Enter a title here");
+        descr.setHint("Describe your offer here");
 
+        time.setText(String.format("%02d:%02d", 12, 34));
+        //showDate.setText(String.format("%02d.%02d.%04d", calendar.get(Calendar.DAY_OF_YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR)));
+        showDate.setHint("When does your offer end?");
+        time.setVisibility(View.INVISIBLE);
+        date.setVisibility(View.INVISIBLE);
 
         //On CLICK LISTERNERS-----------------------------------------------------------------------------------------------------------
 
@@ -138,6 +169,26 @@ public class OfferFragment extends Fragment {
                 startActivityForResult(cameraIntent, 2);
             }
         });
+
+
+        showDate.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dpd = new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        showDate.setText(String.format("%02d.%02d.%04d",dayOfMonth , monthOfYear+1, year));
+                        datecontrol = String.format("%04d/%02d/%02d", year, monthOfYear+1, dayOfMonth);
+                    }
+                },
+                calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+                dpd.setTitle("Select Date");
+                dpd.show();
+
+            }
+        });
+
+        /* 000000  time and date picker !
 
         date.setOnClickListener(new OnClickListener() {
             @Override
@@ -176,6 +227,8 @@ public class OfferFragment extends Fragment {
             }
         });
 
+        */
+
 
         submitButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -199,34 +252,14 @@ public class OfferFragment extends Fragment {
                     submitIt=false;
                 }
 
-                boolean timecorrect=false;
-
-                if((!(time.getText().toString().equals(""))) && submitIt) {
-                    String tmStart = time.getText().toString();
-                    SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-                    try {
-                        Date dateput = format.parse(tmStart);
-                        Date datenow = format.parse(calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE));
-                        if (dateput.compareTo(datenow) > 0) {
-                            timecorrect = true;
-                        } else {
-                            Toast.makeText(getContext(), "Enter a valid time please", Toast.LENGTH_LONG).show();
-                        }
-                    } catch (ParseException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                } else if(submitIt) {
-                    Toast.makeText(getContext(), "Enter a valid time please", Toast.LENGTH_LONG).show();
-                }
 
                 boolean datecorrect=false;
 
-                if((!(date.getText().toString().equals(""))) && submitIt && timecorrect) {
-                    String dtStart = date.getText().toString();
-                    SimpleDateFormat formatdate = new SimpleDateFormat("MM/dd/yyyy");
+                if((!(showDate.getText().toString().equals(""))) && submitIt) {
+                    String dtStart = showDate.getText().toString();
+                    SimpleDateFormat formatdate = new SimpleDateFormat("yyyy/MM/dd");
                     try {
-                        Date dateput = formatdate.parse(dtStart);
+                        Date dateput = formatdate.parse(datecontrol);
                         Date datenow = formatdate.parse(String.valueOf(new StringBuilder().append(calendar.get(Calendar.MONTH) + 1).append("/").append(calendar.get(Calendar.DAY_OF_YEAR)).append("/")
                                 .append(calendar.get(Calendar.YEAR)).append(" ")));
                         if (dateput.compareTo(datenow) > -1) {
@@ -238,11 +271,11 @@ public class OfferFragment extends Fragment {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
-                } else if(submitIt && timecorrect) {
+                } else if(submitIt) {
                     Toast.makeText(getContext(), "Enter a valid date please", Toast.LENGTH_LONG).show();
                 }
 
-                if(!(datecorrect&&timecorrect)){
+                if(!(datecorrect)){
                     submitIt=false;
                 }
 
@@ -264,7 +297,7 @@ public class OfferFragment extends Fragment {
                         String method = "post";
                         DbInterface dbInterfacenew = new DbInterface(getContext());
                         dbInterfacenew.execute(method, MainActivity.ANDROID_ID.toString(),Integer.toString(categoriesSpinner.getSelectedItemPosition()), title.getText().toString(),
-                                descr.getText().toString(), timeputin, dateputin, time.getText().toString(),date.getText().toString(),
+                                descr.getText().toString(), timeputin, dateputin, showDate.getText().toString(),
                                 Double.toString(gpsTracker.getLatitude()),Double.toString(gpsTracker.getLongitude()));
                         //dbInterface.execute(method, name, description);
                         //finish();
@@ -279,6 +312,8 @@ public class OfferFragment extends Fragment {
             }
         });
 
+        view.requestFocus();
+
         return view;
     }
 
@@ -286,7 +321,11 @@ public class OfferFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 2) {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
-            imagebuttonCamera.setImageBitmap(photo);
+
+            //test--------------------------------------------------------------------------------------------------------------------------------------------0
+            Drawable d = new BitmapDrawable(Bitmap.createScaledBitmap(photo, offerimagecontainer.getWidth()/2, offerimagecontainer.getHeight(), false));
+            offerimagecontainer.setBackground(d);
+
             imagebuttonCamera.setBackground(null);
             try{
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
@@ -303,9 +342,6 @@ public class OfferFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-
-
-
     }
 
     @Override
@@ -318,26 +354,6 @@ public class OfferFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
-
-
-    class mDateSetListener implements DatePickerDialog.OnDateSetListener {
-
-        @Override
-        public void onDateSet(DatePicker view, int year, int monthOfYear,
-                              int dayOfMonth) {
-            // TODO Auto-generated method stub
-            // getCalender();
-            int mYear = year;
-            int mMonth = monthOfYear;
-            int mDay = dayOfMonth;
-            date.setText(new StringBuilder()
-                    // Month is 0 based so add 1
-                    .append(mMonth + 1).append("/").append(mDay).append("/")
-                    .append(mYear).append(" "));
-            System.out.println(date.getText().toString());
-        }
-    }
-
 
 }
 
