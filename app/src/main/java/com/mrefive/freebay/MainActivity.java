@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity
      */
     SharedPreferences sharedPreferences;
     private NavigationDrawerFragment mNavigationDrawerFragment;
+    //
     GPSTracker gpsTracker;
 
     GetJSONforProfile getJSONforProfile;
