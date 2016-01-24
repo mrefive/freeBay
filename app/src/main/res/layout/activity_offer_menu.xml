@@ -9,29 +9,49 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/offer_menu_scrollView" >
+        android:id="@+id/activity_offer_menu_scrollView"
+        android:fitsSystemWindows="true">
 
         <RelativeLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:id="@+id/spinnercontainer"
+            android:scrollIndicators="right">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:gravity="center_vertical|center_horizontal"
+                android:minHeight="180dp"
+                android:id="@+id/offerimagecontainer"
+                android:background="#ffffff"
+                android:layout_marginRight="13dp"
+                android:layout_marginLeft="13dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="7dp"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
+                android:layout_alignParentTop="false"
                 android:id="@+id/rellaytitle"
-                android:background="@android:drawable/dialog_holo_light_frame">
+                android:layout_marginLeft="13dp"
+                android:layout_marginRight="13dp"
+                android:background="#ffffff"
+                android:layout_marginTop="5dp"
+                android:layout_below="@+id/offerimagecontainer">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/offermenutitletitle"
                     android:id="@+id/offermenutitletitle"
-                    android:textSize="20dp"
+                    android:textSize="15dp"
                     android:textColor="#000000"
                     android:layout_alignParentTop="true"
-                    android:layout_marginLeft="5dp"
-                    android:textStyle="bold" />
+                    android:layout_marginLeft="5dp" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -42,9 +62,9 @@
                     android:layout_centerHorizontal="true"
                     android:textSize="16dp"
                     android:layout_below="@+id/offermenutitletitle"
-                    android:layout_marginLeft="10dp"
+                    android:layout_marginLeft="20dp"
                     android:layout_marginTop="5dp"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginRight="20dp"
                     android:layout_marginBottom="5dp"
                     android:textColor="#FF282828"
                     android:textStyle="normal" />
@@ -56,7 +76,10 @@
                 android:id="@+id/rellaydescr"
                 android:layout_below="@+id/rellaytitle"
                 android:layout_alignParentTop="false"
-                android:background="@android:drawable/dialog_holo_light_frame">
+                android:layout_marginLeft="13dp"
+                android:layout_marginRight="13dp"
+                android:background="#ffffff"
+                android:layout_marginTop="5dp">
 
                 <TextView
                     android:layout_width="match_parent"
@@ -66,10 +89,10 @@
                     android:layout_below="@+id/offermenudescrtitle"
                     android:layout_centerHorizontal="true"
                     android:textSize="16dp"
-                    android:layout_marginLeft="10dp"
+                    android:layout_marginLeft="20dp"
                     android:layout_marginTop="5dp"
                     android:textAlignment="gravity"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginRight="20dp"
                     android:layout_marginBottom="5dp"
                     android:textColor="#282828" />
 
@@ -78,11 +101,10 @@
                     android:layout_height="wrap_content"
                     android:text="@string/offermenudescrtitle"
                     android:id="@+id/offermenudescrtitle"
-                    android:textSize="20dp"
+                    android:textSize="15dp"
                     android:textColor="#000000"
                     android:layout_marginLeft="5dp"
-                    android:layout_alignParentTop="true"
-                    android:textStyle="bold" />
+                    android:layout_alignParentTop="true" />
 
             </RelativeLayout>
 
@@ -100,7 +122,10 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:layout_marginBottom="10dp" />
+
+
         </RelativeLayout>
+
     </ScrollView>
 
 

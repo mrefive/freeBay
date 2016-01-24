@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">freeBay</string>
+    <string name="app_name">Free Bay</string>
 
-    <string name="title_section1">Offer</string>
-    <string name="title_section2">Map</string>
+    <string name="title_section1">Create an offer</string>
+    <string name="title_section2">Search for offers</string>
     <string name="title_section3">Profile</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -31,7 +31,7 @@
     <string name="tVdescrtitle">Describe your offer</string>
     <string name="tVdatetitle">End date</string>
 
-    <string name="tVfillerTitle">How to place an order:</string>
+    <string name="tVfillerTitle">How to place an offer:</string>
     <string name="tVfiller1">Take a picture of your offer by touching the camera icon</string>
     <string name="tVfiller2">Chose a category and fill the forms</string>
     <string name="tVfiller3">Submit your order and wait for a happy taker</string>

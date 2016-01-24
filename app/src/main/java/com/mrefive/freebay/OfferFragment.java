@@ -66,7 +66,7 @@ public class OfferFragment extends Fragment {
 
     //views
     private ImageButton imagebuttonCamera;
-    private RelativeLayout relativeLayoutOfferFrag, offerimagecontainer;
+    private RelativeLayout relativeLayoutOfferFrag, offerimagecontainer, takePictureButton;
     private EditText title, descr, time, date;
     private Button submitButton;
     private Spinner categoriesSpinner;
@@ -129,6 +129,7 @@ public class OfferFragment extends Fragment {
         offerimagecontainer = (RelativeLayout) view.findViewById(R.id.offerimagecontainer);
 
         imagebuttonCamera = (ImageButton) view.findViewById(R.id.buttonGetPicture);
+        takePictureButton = (RelativeLayout) view.findViewById(R.id.offerimagecontainer);
         categoriesSpinner = (Spinner) view.findViewById(R.id.categoriesSpinner);
         title = (EditText) view.findViewById(R.id.offerTitle);
         descr = (EditText) view.findViewById(R.id.offerDescription);
@@ -161,7 +162,7 @@ public class OfferFragment extends Fragment {
 
         //On CLICK LISTERNERS-----------------------------------------------------------------------------------------------------------
 
-        imagebuttonCamera.setOnClickListener(new OnClickListener() {
+        takePictureButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 //open camera int here
@@ -323,7 +324,7 @@ public class OfferFragment extends Fragment {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
 
             //test--------------------------------------------------------------------------------------------------------------------------------------------0
-            Drawable d = new BitmapDrawable(Bitmap.createScaledBitmap(photo, offerimagecontainer.getWidth()/2, offerimagecontainer.getHeight(), false));
+            Drawable d = new BitmapDrawable(Bitmap.createScaledBitmap(photo, offerimagecontainer.getWidth(), offerimagecontainer.getHeight(), false));
             offerimagecontainer.setBackground(d);
 
             imagebuttonCamera.setBackground(null);

@@ -134,7 +134,9 @@ public class NavigationDrawerFragment extends Fragment {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
         actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#3D000000")));
-        actionBar.setStackedBackgroundDrawable(new ColorDrawable(Color.parseColor("#55000000")));
+        //actionBar.setStackedBackgroundDrawable(new ColorDrawable(Color.parseColor("#55000000")));
+        //actionBar.setBackgroundDrawable(null);
+        //actionBar.setStackedBackgroundDrawable(null);
 
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the navigation drawer and the action bar app icon.

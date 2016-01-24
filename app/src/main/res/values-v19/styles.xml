@@ -1,10 +1,37 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
+
         <!-- Customize your theme here. -->
+        <item name="android:windowNoTitle">true</item>
+
+        <item name="windowActionBarOverlay">false</item>
+        <item name="android:windowActionBarOverlay">false</item>
+
+
+        <!-- makes background darker?
+        <item name="android:windowBackground">@android:color/transparent</item>
+        -->
+
+        <!-- <item name="android:colorBackgroundCacheHint">@null</item>
+        -->
+
+        <!-- makes background translucent to see main menu etc
+        <item name="android:windowIsTranslucent">true</item>
+        -->
+
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
+
+        <item name="android:fitsSystemWindows">false</item>
+        <item name="android:clipToPadding">false</item>
+
+    </style>
+
+    <style name="MyTheme.ActionBar" parent="Base.Widget.AppCompat.ActionBar">
+        <item name="background">@android:color/transparent</item>
+        <item name="android:background">@android:color/transparent</item>
     </style>
 
 </resources>
