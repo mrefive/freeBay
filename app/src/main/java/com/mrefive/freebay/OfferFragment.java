@@ -1,36 +1,35 @@
 package com.mrefive.freebay;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
-import android.app.TimePickerDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextClock;
@@ -38,31 +37,43 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.mrefive.freebay.Camera.CameraForOffer;
+import com.mrefive.freebay.OwnOffersDB.OwnOffersDatabase;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.StringTokenizer;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 
 public class OfferFragment extends Fragment {
 
     //instances
     private ProfileFragment.OnFragmentInteractionListener mListener;
-    private DbInterface dbInterface;
     SharedPreferences prefs;
     private Calendar calendar;
-    private GPSTracker gpsTracker;
 
     //variables
     int containerWidth, containerHeight;
     private int countOfPosts;
 
-    private String name, description, datecontrol;
+    private boolean pictureTaken = false;
+
+    private Uri uri;
+    private String UOID, datecontrol, dateputin, lat, lng, imageName;
 
     //instances
-
+    private Drawable picture_taken;
 
     //views
     private ImageButton imagebuttonCamera;
@@ -79,14 +90,6 @@ public class OfferFragment extends Fragment {
     private DatePickerDialog dpd;
 
 
-    /*
-    public static OfferFragment2 newInstance(String param1, String param2) {
-        OfferFragment2 fragment = new OfferFragment2();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }*/
-
     public OfferFragment() {
         // Required empty public constructor
     }
@@ -96,8 +99,6 @@ public class OfferFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         prefs = getContext().getSharedPreferences("com.mrefive.freebay", Context.MODE_PRIVATE);
-        dbInterface = new DbInterface(getContext());
-
 
         countOfPosts= prefs.getInt("countOfPosts",0);
 
@@ -111,10 +112,7 @@ public class OfferFragment extends Fragment {
         //getCalendar
         calendar = Calendar.getInstance();
 
-
-
         System.out.println("-------------------------OfferFragment2 container size hxw: " + containerHeight + "x" + containerWidth);
-
 
     }
 
@@ -133,8 +131,6 @@ public class OfferFragment extends Fragment {
         categoriesSpinner = (Spinner) view.findViewById(R.id.categoriesSpinner);
         title = (EditText) view.findViewById(R.id.offerTitle);
         descr = (EditText) view.findViewById(R.id.offerDescription);
-        time = (EditText) view.findViewById(R.id.eTTime);
-        date = (EditText) view.findViewById(R.id.eTDate);
         submitButton = (Button) view.findViewById(R.id.submitOffer);
 
         showDate = (TextView) view.findViewById(R.id.showDateDue);
@@ -143,34 +139,31 @@ public class OfferFragment extends Fragment {
         InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
-
         //define spinner items
         String[] items = new String[]{"Chose a category", "Food", "Toys", "Cloths", "Essentials", "Other"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), R.layout.categories_dropdown, items);
         categoriesSpinner.setAdapter(adapter);
 
-        time.setHint("Set Ending Time");
-        date.setHint("Set Ending Date");
         title.setHint("Enter a title here");
         descr.setHint("Describe your offer here");
-
-        time.setText(String.format("%02d:%02d", 12, 34));
-        //showDate.setText(String.format("%02d.%02d.%04d", calendar.get(Calendar.DAY_OF_YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR)));
         showDate.setHint("When does your offer end?");
-        time.setVisibility(View.INVISIBLE);
-        date.setVisibility(View.INVISIBLE);
 
         //On CLICK LISTERNERS-----------------------------------------------------------------------------------------------------------
-
         takePictureButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                //open camera int here
-                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, 2);
+
+                WindowManager.LayoutParams layoutParams = getActivity().getWindow().getAttributes();
+                layoutParams.dimAmount=1.0f;
+                getActivity().getWindow().setAttributes(layoutParams);
+
+                takePictureButton.setBackgroundColor(Color.parseColor("#5460E3"));
+
+                Intent camera = new Intent(getActivity(), CameraForOffer.class);
+                startActivityForResult(camera, 1);
+
             }
         });
-
 
         showDate.setOnClickListener(new OnClickListener() {
             @Override
@@ -185,141 +178,82 @@ public class OfferFragment extends Fragment {
                 calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
                 dpd.setTitle("Select Date");
                 dpd.show();
-
             }
         });
-
-        /* 000000  time and date picker !
-
-        date.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int mYear = calendar.get(Calendar.YEAR);
-                int mMonth = calendar.get(Calendar.MONTH);
-                int mDay = calendar.get(Calendar.DAY_OF_MONTH);
-                System.out.println("the selected " + mDay);
-                DatePickerDialog dialog = new DatePickerDialog(getContext(),
-                        new mDateSetListener(), mYear, mMonth, mDay);
-                dialog.setTitle("Select Date");
-                dialog.show();
-            }
-        });
-
-        time.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int hour;
-                if(calendar.get(Calendar.HOUR_OF_DAY)!=23) {
-                    hour = calendar.get(Calendar.HOUR_OF_DAY) + 1;
-                } else {
-                    hour = 1;
-                }
-                int minute = calendar.get(Calendar.MINUTE);
-                TimePickerDialog mTimePicker;
-                mTimePicker = new TimePickerDialog(getContext(), new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                        String output = String.format("%02d:%02d", selectedHour, selectedMinute);
-                        time.setText(output);
-                    }
-                }, hour, 0, true);//Yes 24 hour time
-                mTimePicker.setTitle("Select Time");
-                mTimePicker.show();
-            }
-        });
-
-        */
-
 
         submitButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean submitIt = true;
 
-                //testpurpose
-                Log.d("OfferFragment",Integer.toString(categoriesSpinner.getSelectedItemPosition()) );
+                if(isNetworkAvailable()) {
 
-                //check if data is complete
-                if((categoriesSpinner.getSelectedItem().toString().equals("Chose category")) && submitIt) {
-                    Toast.makeText(getContext(),"Please chose a category", Toast.LENGTH_LONG).show();
-                    submitIt=false;
-                }
-                if(title.getText().toString().equals("") && submitIt) {
-                    Toast.makeText(getContext(),"Please give your offer a title", Toast.LENGTH_LONG).show();
-                    submitIt=false;
-                }
-                if(descr.getText().toString().equals("") && submitIt) {
-                    Toast.makeText(getContext(),"Please describe your offer", Toast.LENGTH_LONG).show();
-                    submitIt=false;
-                }
-
-
-                boolean datecorrect=false;
-
-                if((!(showDate.getText().toString().equals(""))) && submitIt) {
-                    String dtStart = showDate.getText().toString();
-                    SimpleDateFormat formatdate = new SimpleDateFormat("yyyy/MM/dd");
-                    try {
-                        Date dateput = formatdate.parse(datecontrol);
-                        Date datenow = formatdate.parse(String.valueOf(new StringBuilder().append(calendar.get(Calendar.MONTH) + 1).append("/").append(calendar.get(Calendar.DAY_OF_YEAR)).append("/")
-                                .append(calendar.get(Calendar.YEAR)).append(" ")));
-                        if (dateput.compareTo(datenow) > -1) {
-                            datecorrect = true;
-                        } else {
-                            Toast.makeText(getContext(), "Enter a valid date please", Toast.LENGTH_LONG).show();
-                        }
-                    } catch (ParseException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                    if (isContentTrue()) {
+                        prepareMissingContent();
+                        startUpload();
                     }
-                } else if(submitIt) {
-                    Toast.makeText(getContext(), "Enter a valid date please", Toast.LENGTH_LONG).show();
-                }
 
-                if(!(datecorrect)){
-                    submitIt=false;
-                }
+                } else {
+                    LayoutInflater inflater = getActivity().getLayoutInflater();
 
-                if(submitIt) {
+                    View layout = inflater.inflate(R.layout.toastnoconnection,
+                            (ViewGroup) getActivity().findViewById(R.id.toastnoconnection_id));
 
-                    //prepare missing data for output
-                    gpsTracker = new GPSTracker(getContext());
+                    //set a message
+                    TextView text = (TextView) layout.findViewById(R.id.textnoconection);
+                    text.setText(getResources().getString(R.string.submitnoconnection));
 
-                    //calendar = null;
-                    //calendar.getInstance();
-                    String timeputin = String.format("%02d:%02d", calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
-                    String dateputin = String.format("%02d.%02d.%04d", calendar.get(Calendar.DAY_OF_YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR));
-
-
-
-                    Log.d("OfferFragment", "Offer submit hanging...");
-                    if (countOfPosts < 555) {
-                        //post Info
-                        String method = "post";
-                        DbInterface dbInterfacenew = new DbInterface(getContext());
-                        dbInterfacenew.execute(method, MainActivity.ANDROID_ID.toString(),Integer.toString(categoriesSpinner.getSelectedItemPosition()), title.getText().toString(),
-                                descr.getText().toString(), timeputin, dateputin, showDate.getText().toString(),
-                                Double.toString(gpsTracker.getLatitude()),Double.toString(gpsTracker.getLongitude()));
-                        //dbInterface.execute(method, name, description);
-                        //finish();
-
-                        //do extra
-                        countOfPosts++;
-                        prefs.edit().putInt("countOfPosts", countOfPosts).apply();
-                    } else {
-                        Toast.makeText(getContext(), "You have too many Offers", Toast.LENGTH_LONG).show();
-                    }
+                    // Toast...
+                    Toast toast = new Toast(getContext());
+                    toast.setGravity(Gravity.FILL,0,0);
+                    toast.setDuration(Toast.LENGTH_LONG);
+                    toast.setView(layout);
+                    toast.show();
                 }
             }
         });
 
         view.requestFocus();
-
         return view;
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == 1) {
+
+            if(resultCode == Activity.RESULT_OK) {
+
+                Bitmap bitmap=null;
+
+                //get image from uri
+                String uriString = data.getExtras().getString("picture_uri");
+                uri = Uri.parse(uriString);
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+                } catch (IOException e) {
+                    Log.d("Offer Fragment", "Failed to retrieve image from Uri ffs");
+                    e.printStackTrace();
+                }
+
+                picture_taken = new BitmapDrawable(getResources(), bitmap);
+
+                //set background in takePicturebuttonm
+
+                RelativeLayout.LayoutParams layoutParamsTPButton = (RelativeLayout.LayoutParams) takePictureButton.getLayoutParams();
+                layoutParamsTPButton.height= takePictureButton.getWidth();
+                takePictureButton.setLayoutParams(layoutParamsTPButton);
+                Log.d("OfferFragment", "picture container layout widht / height: " + takePictureButton.getWidth() + " / " + takePictureButton.getHeight());
+
+
+                takePictureButton.setBackground(picture_taken);
+                pictureTaken=true;
+            }
+
+            if(resultCode == Activity.RESULT_CANCELED) {
+                takePictureButton.setBackgroundColor(Color.parseColor("#ffffffff"));
+            }
+        }
+
         if (requestCode == 2) {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
 
@@ -339,10 +273,10 @@ public class OfferFragment extends Fragment {
         }
     }
 
+
     @Override
     public void onStart() {
         super.onStart();
-
     }
 
     @Override
@@ -356,5 +290,163 @@ public class OfferFragment extends Fragment {
         mListener = null;
     }
 
+    public String getTitle() {
+        return "Create an offer";
+    }
+
+
+    private boolean isNetworkAvailable() {
+        //check for internet connection
+        return new CheckInternetConnection(getContext()).isNetworkConnected();
+    }
+
+    private boolean isContentTrue() {
+
+        boolean submitIt = true;
+
+        if(countOfPosts>MainActivity.MAXOWNOFFERS) {
+            Toast.makeText(getContext(),"You have too many offers. Please delete one or wait it to expire", Toast.LENGTH_LONG).show();
+            submitIt=false;
+        }
+        //check if data is complete
+        if(!pictureTaken && submitIt) {
+            Toast.makeText(getContext(),"Please take a picture of your offer", Toast.LENGTH_LONG).show();
+            submitIt=false;
+        }
+        if((categoriesSpinner.getSelectedItem().toString().equals("Chose a category")) && submitIt) {
+            Toast.makeText(getContext(),"Please chose a category", Toast.LENGTH_LONG).show();
+            submitIt=false;
+        }
+        if(title.getText().toString().equals("") && submitIt) {
+            Toast.makeText(getContext(),"Please give your offer a title", Toast.LENGTH_LONG).show();
+            submitIt=false;
+        }
+        if(descr.getText().toString().equals("") && submitIt) {
+            Toast.makeText(getContext(),"Please describe your offer", Toast.LENGTH_LONG).show();
+            submitIt=false;
+        }
+
+        if(datecontrol==null && submitIt) {
+            submitIt=false;
+            Toast.makeText(getContext(), "Enter an upcoming date please", Toast.LENGTH_LONG).show();
+        }
+
+        if(submitIt) {
+            SimpleDateFormat formatdate = new SimpleDateFormat("yyyy/MM/dd");
+            try {
+                Date dateput = formatdate.parse(datecontrol);
+                Date datenow = formatdate.parse(String.valueOf(new StringBuilder().append(calendar.get(Calendar.MONTH) + 1).append("/").append(calendar.get(Calendar.DAY_OF_YEAR)).append("/")
+                        .append(calendar.get(Calendar.YEAR)).append(" ")));
+                if (!(dateput.compareTo(datenow) > -1)) {
+                    Toast.makeText(getContext(), "Enter an upcoming date please", Toast.LENGTH_LONG).show();
+                    submitIt = false;
+                }
+            } catch (ParseException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                Log.d("OfferFragment", "DATECHECKINGERROR");
+                submitIt = false;
+            }
+        }
+
+        if(submitIt) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void prepareMissingContent(){
+
+        GPSTracker gpsTracker = new GPSTracker(getContext());
+        lat = Double.toString(gpsTracker.getLatitude());
+        lng = Double.toString(gpsTracker.getLongitude());
+
+        //time and date of creating the offer
+        long millis = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssz");
+        Date resultdate = new Date(millis);
+        dateputin = sdf.format(resultdate);
+    }
+
+    private void renamePictureFile(){
+        String fileName = "TMP_" + MainActivity.ANDROID_ID;
+        File oldfile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "FreeBay" + File.separator + fileName);
+        File newfile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "FreeBay" + File.separator + imageName);
+        oldfile.renameTo(newfile);
+    }
+
+    private void startUpload() {
+
+        //CreateUOID createUOID = new CreateUOID(getContext());
+        try {
+            CreateUOID createUOID = new CreateUOID(getActivity()) {
+
+                @Override
+                protected void onPostExecute(String s) {
+                    UOID = s;
+                    Log.d("OfferFragment", "UOID: " +UOID);
+
+                    imageName = dateputin + "_" + UOID + ".jpg";
+
+                    //upload image
+                    Bitmap bm = null;
+                    try {
+                        bm = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                        bm.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+                        byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+                        String encodedImagetmp = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+                        // Upload image to server
+                        new ImageToServer(getContext()).execute(encodedImagetmp, imageName);
+                    } catch (IOException e) {
+                        Log.d("OfferFragment", "submit Image failed onClick....");
+                        e.printStackTrace();
+                    }
+
+                    renamePictureFile();
+
+                    //upload data to server database
+                    OwnOfferDataToServer ownOfferDataToServer = new OwnOfferDataToServer(getContext()) {
+
+                        @Override
+                        protected void onPostExecute(String result) {
+                            Log.d("OfferFragment","POSTING OFFER RESULT: " +result);
+
+                            if(result.equals("Offer Successfully Created!")){
+
+                                OwnOffersDatabase ownOffersDatabase = new OwnOffersDatabase(getContext());
+                                String[] data = new String[10];
+                                data[0] = UOID;
+                                data[1] = MainActivity.ANDROID_ID;
+                                data[2] = title.getText().toString();
+                                data[3] = descr.getText().toString();
+                                data[4] = categoriesSpinner.getSelectedItem().toString();
+                                data[5] = dateputin;
+                                data[6] = showDate.getText().toString();
+                                data[7] = lat;
+                                data[8] = lng;
+                                data[9] = imageName;
+                                ownOffersDatabase.addEntry(ownOffersDatabase, data);
+
+                                countOfPosts++;
+                                prefs.edit().putInt("countOfPosts", countOfPosts).apply();
+                                Toast.makeText(getContext(), "Offer successfully created!", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    };
+
+                    ownOfferDataToServer.execute(UOID, MainActivity.ANDROID_ID,title.getText().toString(),
+                            descr.getText().toString(), categoriesSpinner.getSelectedItem().toString(), dateputin, showDate.getText().toString(),
+                            lat,lng,imageName);
+                }
+            };
+
+            createUOID.execute();
+        } catch (Exception e) {
+        }
+    }
 }
 

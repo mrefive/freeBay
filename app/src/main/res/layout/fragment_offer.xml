@@ -12,8 +12,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/scrollView"
         android:layout_alignParentEnd="false"
-        android:layout_alignParentTop="true"
-        android:fitsSystemWindows="true">
+        android:layout_alignParentTop="true">
 
         <RelativeLayout
             android:orientation="vertical"
@@ -22,10 +21,26 @@
             android:id="@+id/spinnercontainer"
             android:scrollIndicators="right">
 
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/status_bar_height"
+                android:layout_alignParentTop="true"
+                android:id="@+id/placeholderStatusbar">
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/placeholderStatusbar"
+                android:id="@+id/placeholder">
+
+            </FrameLayout>
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_alignParentTop="true"
+                android:layout_below="@+id/placeholder"
                 android:gravity="center_vertical|center_horizontal"
                 android:minHeight="180dp"
                 android:id="@+id/offerimagecontainer"
@@ -56,23 +71,6 @@
                 android:gravity="center_vertical|center_horizontal"
                 android:layout_marginTop="1dp"
                 android:layout_marginBottom="3dp" />
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="time"
-                android:ems="10"
-                android:id="@+id/eTTime" />
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="date"
-                android:ems="10"
-                android:focusable="false"
-                android:id="@+id/eTDate"
-                android:layout_alignParentBottom="false"
-                android:layout_below="@+id/eTTime" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -181,7 +179,7 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="300dp"
                 android:id="@+id/fLfiller1"
                 android:layout_below="@+id/submitOffer"
                 android:layout_marginLeft="13dp"

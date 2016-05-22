@@ -8,6 +8,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.mrefive.freebay.OwnOfferDataToServer;
+import com.mrefive.freebay.OwnOffers;
+import com.mrefive.freebay.OwnOffersDBtoListView;
+
+import java.io.File;
+
 /**
  * Created by mrefive on 1/8/16.
  */
@@ -16,15 +22,13 @@ public class OwnOffersDatabase extends SQLiteOpenHelper {
     public static final int database_version = 1;
 
 
-    private String CREATE_QUERY_OLD = "CREATE TABLE "+ OwnOffersTableInfo.TableInfo.TABLE_NAME+ "("+ OwnOffersTableInfo.TableInfo.TITLE+" TEXT,"+ OwnOffersTableInfo.TableInfo.DESCR+" TEXT);";
-    private String CREATE_QUERY = "CREATE TABLE "+ OwnOffersTableInfo.TableInfo.TABLE_NAME+ "("+ OwnOffersTableInfo.TableInfo.UUID+" TEXT,"+ OwnOffersTableInfo.TableInfo.UOID+" TEXT,"+ OwnOffersTableInfo.TableInfo.CATEGORY+" TEXT,"+ OwnOffersTableInfo.TableInfo.TITLE+" TEXT,"+ OwnOffersTableInfo.TableInfo.DESCR+" TEXT,"+ OwnOffersTableInfo.TableInfo.TIMEPUT+" TEXT,"+ OwnOffersTableInfo.TableInfo.DATEPUT+" TEXT,"+ OwnOffersTableInfo.TableInfo.DATEDUE+" TEXT,"+ OwnOffersTableInfo.TableInfo.LAT+" TEXT,"+ OwnOffersTableInfo.TableInfo.LNG+" TEXT);";
+    private String CREATE_QUERY = "CREATE TABLE "+ OwnOffersTableInfo.TableInfo.TABLE_NAME+ "("+ OwnOffersTableInfo.TableInfo.UOID+" TEXT,"+ OwnOffersTableInfo.TableInfo.UUID+" TEXT,"+ OwnOffersTableInfo.TableInfo.CATEGORY+" TEXT,"+ OwnOffersTableInfo.TableInfo.TITLE+" TEXT,"+ OwnOffersTableInfo.TableInfo.DESCRIPTION+" TEXT,"+ OwnOffersTableInfo.TableInfo.DATEPUT+" TEXT,"+ OwnOffersTableInfo.TableInfo.DATEEND+" TEXT,"+ OwnOffersTableInfo.TableInfo.LAT+" TEXT,"+ OwnOffersTableInfo.TableInfo.LNG+ " TEXT,"+ OwnOffersTableInfo.TableInfo.IMGNAME+ " TEXT);";
 
 
     public OwnOffersDatabase(Context context) {
         super(context, OwnOffersTableInfo.TableInfo.DB_NAME, null, database_version);
-        Log.d("Database operations", "Database own_offers_local_db created");
+        Log.d("Database operations", "Database freebay_own_offers_local_db created");
         Log.d("OwnOffersDatabase", "Table create Query: " + CREATE_QUERY);
-        Log.d("OwnOffersDatabase", "Table create Query: " + CREATE_QUERY_OLD);
 
     }
 
@@ -32,7 +36,6 @@ public class OwnOffersDatabase extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_QUERY);
         Log.d("Database operations", "Table own_offers_table created");
-
     }
 
     @Override
@@ -40,7 +43,7 @@ public class OwnOffersDatabase extends SQLiteOpenHelper {
 
     }
 
-    public void putInformation(OwnOffersDatabase ownOffersDatabase, String UUID, String UOID, String category,String title,String descr,String timeput,String dateput,String datedue,String lat,String lng) {
+    public void putInformation(OwnOffersDatabase ownOffersDatabase, String UOID, String UUID, String category,String title,String description,String dateput,String dateend,String lat,String lng, String imgname) {
 
         SQLiteDatabase sqLiteDatabase = ownOffersDatabase.getWritableDatabase();
 
@@ -48,33 +51,48 @@ public class OwnOffersDatabase extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
 
         //choose column and define value to add there
-        contentValues.put(OwnOffersTableInfo.TableInfo.UUID, UUID);
-        contentValues.put(OwnOffersTableInfo.TableInfo.UOID, UOID);
+        contentValues.put(OwnOffersTableInfo.TableInfo.UOID, UUID);
+        contentValues.put(OwnOffersTableInfo.TableInfo.UUID, UOID);
         contentValues.put(OwnOffersTableInfo.TableInfo.CATEGORY, category);
         contentValues.put(OwnOffersTableInfo.TableInfo.TITLE, title);
-        contentValues.put(OwnOffersTableInfo.TableInfo.DESCR, descr);
-        contentValues.put(OwnOffersTableInfo.TableInfo.TIMEPUT, timeput);
+        contentValues.put(OwnOffersTableInfo.TableInfo.DESCRIPTION, description);
         contentValues.put(OwnOffersTableInfo.TableInfo.DATEPUT, dateput);
-        contentValues.put(OwnOffersTableInfo.TableInfo.DATEDUE, datedue);
+        contentValues.put(OwnOffersTableInfo.TableInfo.DATEEND, dateend);
         contentValues.put(OwnOffersTableInfo.TableInfo.LAT, lat);
         contentValues.put(OwnOffersTableInfo.TableInfo.LNG, lng);
+        contentValues.put(OwnOffersTableInfo.TableInfo.IMGNAME, imgname);
 
         //insert contentValue with sqlite method
         sqLiteDatabase.insert(OwnOffersTableInfo.TableInfo.TABLE_NAME, null, contentValues);
         //Log.d("Database operations", "One row inserted into own_offers_table");
     }
 
+    public void addEntry(OwnOffersDatabase ownOffersDatabase, String data[]){
+
+        SQLiteDatabase sqLiteDatabase = ownOffersDatabase.getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(OwnOffersTableInfo.TableInfo.UOID, data[0]);
+        contentValues.put(OwnOffersTableInfo.TableInfo.UUID, data[1]);
+        contentValues.put(OwnOffersTableInfo.TableInfo.CATEGORY, data[2]);
+        contentValues.put(OwnOffersTableInfo.TableInfo.TITLE, data[3]);
+        contentValues.put(OwnOffersTableInfo.TableInfo.DESCRIPTION, data[4]);
+        contentValues.put(OwnOffersTableInfo.TableInfo.DATEPUT, data[5]);
+        contentValues.put(OwnOffersTableInfo.TableInfo.DATEEND, data[6]);
+        contentValues.put(OwnOffersTableInfo.TableInfo.LAT, data[7]);
+        contentValues.put(OwnOffersTableInfo.TableInfo.LNG, data[8]);
+        contentValues.put(OwnOffersTableInfo.TableInfo.IMGNAME, data[9]);
+
+        sqLiteDatabase.insert(OwnOffersTableInfo.TableInfo.TABLE_NAME, null, contentValues);
+        Log.d("OwnOffersDatabase", "New Entry in LocalDB created");
+    }
+
+
     //delete an entry
     public void deleteEntry(OwnOffersDatabase ownOffersDatabase, String UOID) {
 
         SQLiteDatabase sqLiteDatabase = ownOffersDatabase.getWritableDatabase();
-
-        /*
-        String selection = OwnOffersTableInfo.TableInfo.UUID+" LIKE ? AND "+ OwnOffersTableInfo.TableInfo.UOID+" LIKE ? AND "+ OwnOffersTableInfo.TableInfo.CATEGORY+" LIKE ? AND "+ OwnOffersTableInfo.TableInfo.TITLE+" LIKE ? AND "+ OwnOffersTableInfo.TableInfo.DESCR+" LIKE ? AND "+ OwnOffersTableInfo.TableInfo.TIMEPUT+" LIKE ? AND "+ OwnOffersTableInfo.TableInfo.DATEPUT+" LIKE ? AND "+ OwnOffersTableInfo.TableInfo.TIMEDUE+" LIKE ? AND "+ OwnOffersTableInfo.TableInfo.DATEDUE+" LIKE ? AND "+ OwnOffersTableInfo.TableInfo.LAT+" LIKE ? AND "+ OwnOffersTableInfo.TableInfo.LNG+" LIKE ?";
-        String args[] = {UOID};
-        //sqLiteDatabase.delete(OwnOffersTableInfo.TableInfo.TABLE_NAME, selection, args);
-        sqLiteDatabase.delete(OwnOffersTableInfo.TableInfo.TABLE_NAME, "WHERE UOID = " +UOID, ar)
-        */
 
         String sql_query = "DELETE FROM " + OwnOffersTableInfo.TableInfo.TABLE_NAME + " WHERE UOID = '" +UOID +"'";
         sqLiteDatabase.execSQL(sql_query);
@@ -91,7 +109,7 @@ public class OwnOffersDatabase extends SQLiteOpenHelper {
     public Cursor getInformation(OwnOffersDatabase ownOffersDatabase) {
         SQLiteDatabase sqLiteDatabase = ownOffersDatabase.getReadableDatabase();
         //String[] columns = {OwnOffersTableInfo.TableInfo.TITLE, OwnOffersTableInfo.TableInfo.DESCR};
-        String[] columns = {OwnOffersTableInfo.TableInfo.UUID, OwnOffersTableInfo.TableInfo.UOID, OwnOffersTableInfo.TableInfo.CATEGORY, OwnOffersTableInfo.TableInfo.TITLE, OwnOffersTableInfo.TableInfo.DESCR, OwnOffersTableInfo.TableInfo.TIMEPUT, OwnOffersTableInfo.TableInfo.DATEPUT, OwnOffersTableInfo.TableInfo.DATEDUE, OwnOffersTableInfo.TableInfo.LAT, OwnOffersTableInfo.TableInfo.LNG};
+        String[] columns = {OwnOffersTableInfo.TableInfo.UOID, OwnOffersTableInfo.TableInfo.UUID, OwnOffersTableInfo.TableInfo.CATEGORY, OwnOffersTableInfo.TableInfo.TITLE, OwnOffersTableInfo.TableInfo.DESCRIPTION, OwnOffersTableInfo.TableInfo.DATEPUT, OwnOffersTableInfo.TableInfo.DATEEND, OwnOffersTableInfo.TableInfo.LAT, OwnOffersTableInfo.TableInfo.LNG, OwnOffersTableInfo.TableInfo.IMGNAME};
         Cursor cursor = sqLiteDatabase.query(OwnOffersTableInfo.TableInfo.TABLE_NAME, columns, null, null, null, null, null);
 
         return cursor;
@@ -107,6 +125,12 @@ public class OwnOffersDatabase extends SQLiteOpenHelper {
 
         return cursor;
 
+    }
+
+    public boolean doesDatabaseExist(Context context) {
+        File dbFile = context.getDatabasePath(OwnOffersTableInfo.TableInfo.DB_NAME);
+        Log.d("OwnOffersDatabaseW", "path to db is: " + OwnOffersTableInfo.TableInfo.DB_NAME);
+        return dbFile.exists();
     }
 
 

@@ -21,6 +21,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.mrefive.freebay.OwnOffersDB.OwnOffersDatabase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,17 +43,11 @@ public class ProfileFragment extends Fragment {
     private int countOfPosts;
 
     private TextView showCountOfPosts;
-    private Button buttonMinusOne;
     private LinearLayout linearLayoutProfFrag;
-    private ListView listViewOffers;
-
-    //JSON
-    private String receivedText;
-
-    private JSONtoListView jsoNtoListView;
 
     //instances
-    private OnFragmentInteractionListener mListener;
+    private OwnOffersDatabase ownOffersDatabase;
+    private OwnOffersDBtoListView ownOffersDBtoListView;
     private SharedPreferences prefs;
     private View view;
 
@@ -66,7 +63,6 @@ public class ProfileFragment extends Fragment {
         prefs = getContext().getSharedPreferences("com.mrefive.freebay", Context.MODE_PRIVATE);
         countOfPosts= prefs.getInt("countOfPosts", 0);
 
-
     }
 
     @Override
@@ -78,39 +74,15 @@ public class ProfileFragment extends Fragment {
 
         linearLayoutProfFrag = (LinearLayout) view.findViewById(R.id.LinLayProfileFrag);
 
-        receivedText=prefs.getString("receivedText", "");
+        ownOffersDatabase = new OwnOffersDatabase(getContext());
 
-        System.out.println(receivedText);
+        if(ownOffersDatabase.doesDatabaseExist(getContext())) {
 
-        jsoNtoListView = new JSONtoListView(getContext());
-        jsoNtoListView.createListView();
+            updateListView();
 
-        linearLayoutProfFrag.addView(jsoNtoListView.getListView());
-
-
-        //make listView klickable
-        jsoNtoListView.getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println("CLICK LIST ITEM position: " + position + "id: " + id);
-
-
-                Bundle bundle = new Bundle();
-                bundle.putInt("listViewPosition", position);
-
-                Intent intent = new Intent(getContext(), OfferMenuActivity.class);
-
-                intent.putExtras(bundle);
-                startActivity(intent);
-
-                //OfferMenuFragment offerMenuFragment = new OfferMenuFragment();
-                //linearLayoutProfFrag.removeAllViews();
-                //getActivity().getSupportFragmentManager().beginTransaction().add(R.id.LinLayProfileFrag,offerMenuFragment).addToBackStack(null).commit();
-                //setViewLayout(R.layout.offer_menu);
-
-
-            }
-        });
+        } else {
+            Toast.makeText(getContext(), "No database available. Try again later", Toast.LENGTH_LONG).show();
+        }
 
         Log.d("Profile Fragment", "Create View executed");
 
@@ -133,28 +105,14 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        jsoNtoListView = new JSONtoListView(getContext());
-        jsoNtoListView.createListView();
 
-        linearLayoutProfFrag.removeAllViews();
-        linearLayoutProfFrag.addView(jsoNtoListView.getListView());
+        if(ownOffersDatabase.doesDatabaseExist(getContext())) {
 
-        //make listView klickable
-        jsoNtoListView.getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println("CLICK LIST ITEM position: " + position + "id: " + id);
+            updateListView();
 
-                Bundle bundle = new Bundle();
-                bundle.putInt("listViewPosition", position);
-
-                Intent intent = new Intent(getContext(), OfferMenuActivity.class);
-
-                intent.putExtras(bundle);
-                startActivity(intent);
-
-            }
-        });
+        } else {
+            Toast.makeText(getContext(), "No database available. Try again later", Toast.LENGTH_LONG).show();
+        }
 
         Log.d("Profile Fragment", "OnResume executed");
 
@@ -169,24 +127,13 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        //mListener = null;
     }
 
     public interface OnFragmentInteractionListener {
         public void onFragmentInteraction(Uri uri);
     }
 
-    public void openMenu(View view) {
-        /*
-        FrameLayout offerMenu = new FrameLayout(getContext());
-        FrameLayout.LayoutParams lpOfferMenu = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        offerMenu.setLayoutParams(lpOfferMenu);
-        */
-
-        setViewLayout(R.layout.offer_menu);
-
-
-    }
 
     private void setViewLayout(int id){
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -195,6 +142,29 @@ public class ProfileFragment extends Fragment {
         rootView.removeAllViews();
         rootView.addView(view);
 
+    }
+
+    public String getTitle() {
+        return "Profile";
+    }
+
+    private void updateListView() {
+        ownOffersDBtoListView = new OwnOffersDBtoListView(getContext());
+        ownOffersDBtoListView.createListView();
+        linearLayoutProfFrag.addView(ownOffersDBtoListView.getListView());
+
+        ownOffersDBtoListView.getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("ProfileFragment", " List item clicked : #" +position + "id: " +id);
+                Bundle bundle = new Bundle();
+                bundle.putInt("listViewPosition", position);
+
+                Intent intent = new Intent(getContext(), OfferMenuActivity.class);
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        });
     }
 
 }

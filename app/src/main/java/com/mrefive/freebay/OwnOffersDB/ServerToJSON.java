@@ -62,6 +62,10 @@ public class ServerToJSON extends AsyncTask <String, Void, String> {
             //post info
             URL url = new URL(json_url);
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+            //neuf
+            httpURLConnection.setConnectTimeout(2000);
+            httpURLConnection.setReadTimeout(2000);
+
             httpURLConnection.setRequestMethod("POST");
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setDoInput(true);
@@ -88,7 +92,6 @@ public class ServerToJSON extends AsyncTask <String, Void, String> {
             //request data from db into string
             while ((JSON_STRING = bufferedReader.readLine()) != null) {
                 stringBuilder.append(JSON_STRING + "\n");
-
             }
 
             //close http connection

@@ -1,46 +1,60 @@
 package com.mrefive.freebay;
 
-import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
+import android.location.LocationManager;
+import android.os.StrictMode;
 import android.provider.Settings;
+import android.support.design.widget.NavigationView;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
-import android.view.Window;
-import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.mrefive.freebay.OwnOffersDB.ServerToJSON;
 import com.mrefive.freebay.Search_Googlemaps.SearchFragment;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+public class MainActivity extends AppCompatActivity {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     SharedPreferences sharedPreferences;
-    private NavigationDrawerFragment mNavigationDrawerFragment;
-    //
+
     GPSTracker gpsTracker;
 
-    GetJSONforProfile getJSONforProfile;
+    //drawer toolbar
+    Toolbar toolbar;
+    DrawerLayout drawerLayout;
+    ActionBarDrawerToggle actionBarDrawerToggle;
+
+    NavigationView navigationView;
 
     //fragments
     Bundle argsSearchfragment;
-    OfferFragment offerFragment2 = new OfferFragment();
+    OfferFragment offerFragment = new OfferFragment();
     SearchFragment searchFragment = new SearchFragment();
     ProfileFragment profileFragment = new ProfileFragment();
+
+    //views
+    RelativeLayout mainContainer;
 
     //variables
     private GoogleApiClient mGoogleApiClient;
@@ -50,12 +64,10 @@ public class MainActivity extends AppCompatActivity
     private boolean stateProfileFragment=false;
     private boolean stateSearchFragment=false;
 
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
     private CharSequence mTitle;
 
     public static String ANDROID_ID;
+    public static int MAXOWNOFFERS;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,142 +81,151 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
+        //strictmode entfernt!!!!!!!!
+
 
         sharedPreferences = this.getSharedPreferences("com.mrefive.freebay", this.MODE_PRIVATE);
 
+        //initialize container
+        mainContainer = (RelativeLayout) findViewById(R.id.mainContainer);
+
+        //set up action baar as toolbar with button
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setBackgroundColor(Color.parseColor("#B40C1CD4"));
+        //toolbar.getBackground().setAlpha(80);
+
+        setSupportActionBar(toolbar);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+        drawerLayout.setDrawerListener(actionBarDrawerToggle);
+        navigationView = (NavigationView) findViewById(R.id.navigation_view);
 
 
+        //getLatLng and check if GPS is enabled
+        final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
+        if ( !manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+                    .setCancelable(false)
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            dialog.cancel();
+                        }
+                    });
+            final AlertDialog alert = builder.create();
+            alert.show();
+        }
 
-        //getLatLng
-        gpsTracker = new GPSTracker(this);
+        GPSTracker gpsTracker = new GPSTracker(this);
         argsSearchfragment = new Bundle();
         System.out.println("--------------------------------- lat= " + gpsTracker.getLatitude() + "lng = " + gpsTracker.getLongitude());
         argsSearchfragment.putDouble("lat", gpsTracker.getLatitude());
         argsSearchfragment.putDouble("lng", gpsTracker.getLongitude());
         searchFragment.setArguments(argsSearchfragment);
 
-
-        /*
-        //get JSON
-        getJSONforProfile = new GetJSONforProfile(this);
-        getJSONforProfile.getJSON();
-
-       */
-
-
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
-
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
-
-        //getActionBar().setStackedBackgroundDrawable(new ColorDrawable(Color.parseColor("#55000000")));
-
-
-        //save Android ID
+        //sset static vars
         ANDROID_ID = Settings.Secure.getString(this.getContentResolver(),
-                Settings.Secure.ANDROID_ID); ;
+                Settings.Secure.ANDROID_ID);
         Log.d("Mainactivity", "Android ID = "+ ANDROID_ID);
+        MAXOWNOFFERS = 20;
 
+        /*only check online DB when opening profilefragment
         //retrieve JSON from Server
         ServerToJSON serverToJSON = new ServerToJSON(this);
         serverToJSON.execute(ANDROID_ID);
+        */
 
+        getSupportFragmentManager().beginTransaction().add(R.id.mainContainer, offerFragment).commit();
+        getSupportActionBar().setTitle("Create an offer");
+
+
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
+
+                switch (menuItem.getItemId()) {
+                    case R.id.offer_id:
+                        showHideFragment(offerFragment, searchFragment, profileFragment);
+                        getSupportActionBar().setTitle(R.string.title_section1);
+                        menuItem.setChecked(true);
+                        drawerLayout.closeDrawers();
+                        break;
+                    case R.id.search_id:
+                        showHideFragment(searchFragment, offerFragment, profileFragment);
+                        getSupportActionBar().setTitle(R.string.title_section2);
+                        menuItem.setChecked(true);
+                        drawerLayout.closeDrawers();
+                        break;
+                    case R.id.profile_id:
+                        showHideFragment(profileFragment, searchFragment, offerFragment);
+                        getSupportActionBar().setTitle(R.string.title_section3);
+                        menuItem.setChecked(true);
+                        drawerLayout.closeDrawers();
+                        break;
+                }
+                return false;
+            }
+        });
     }
-
 
     @Override
-    public void onNavigationDrawerItemSelected(int position) {
-        // update the main content by replacing fragments
+    protected void onResume() {
+        super.onResume();
 
-        //set tmpFragment
-        android.support.v4.app.Fragment tmpFragment = null;
+        //check for internet connection
+        if (!new CheckInternetConnection(this).isNetworkConnected()) {
+            LayoutInflater inflater = getLayoutInflater();
 
+            View layout = inflater.inflate(R.layout.toastnoconnection,
+                    (ViewGroup) findViewById(R.id.toastnoconnection_id));
 
+            // set a message
+            //TextView text = (TextView) layout.findViewById(R.id.text);
+            //text.setText("Button is clicked!");
 
-        switch(position) {
-            case 0:
-                System.out.println("switch case o");
-                //tmpFragment = new OfferFragment2();
-                //next step: commit/hide/show !! <--------------------------------------------------------------------------!!!!!!
-                if(stateSearchFragment) {
-                    getSupportFragmentManager().beginTransaction().hide(searchFragment).commit();
-                }
-                if(stateProfileFragment) {
-                    getSupportFragmentManager().beginTransaction().hide(profileFragment).commit();
-                }
-                if(stateOfferFragment) {
-                    getSupportFragmentManager().beginTransaction().show(offerFragment2).commit();
-                } else {
-                    getSupportFragmentManager().beginTransaction().add(R.id.container, offerFragment2).commit();
-                    stateOfferFragment=true;
-                }
-                break;
-            case 1:
-                System.out.println("switch case 1");
-
-                if(stateOfferFragment) {
-                    getSupportFragmentManager().beginTransaction().hide(offerFragment2).commit();
-                }
-                if(stateProfileFragment) {
-                    getSupportFragmentManager().beginTransaction().hide(profileFragment).commit();
-                }
-                if(stateSearchFragment) {
-                    getSupportFragmentManager().beginTransaction().show(searchFragment).commit();
-                } else {
-                    getSupportFragmentManager().beginTransaction().add(R.id.container, searchFragment).commit();
-                    stateSearchFragment=true;
-                }
-                break;
-            case 2:
-                System.out.println("switch case 2");
-                if(stateSearchFragment) {
-                    getSupportFragmentManager().beginTransaction().hide(searchFragment).commit();
-                }
-                if(stateOfferFragment) {
-                    getSupportFragmentManager().beginTransaction().hide(offerFragment2).commit();
-                }
-                if(stateProfileFragment) {
-                    getSupportFragmentManager().beginTransaction().show(profileFragment).commit();
-                } else {
-                    if(sharedPreferences.getString("receivedText", null)!=null) {
-                        getSupportFragmentManager().beginTransaction().add(R.id.container, profileFragment).commit();
-                        stateProfileFragment=true;
-
-                        getSupportActionBar().setTitle("Profile");
-                    } else {
-                        Toast.makeText(this, "Your data is not ready yet..", Toast.LENGTH_LONG);
-                    }
-                }
-                break;
-        }
-
-    }
-
-    public void onSectionAttached(int number) {
-        switch (number) {
-            case 1:
-                mTitle = getString(R.string.title_section1);
-                break;
-            case 2:
-                mTitle = getString(R.string.title_section2);
-                break;
-            case 3:
-                mTitle = getString(R.string.title_section3);
-                break;
+            // Toast...
+            Toast toast = new Toast(getApplicationContext());
+            //toast.setGravity(Gravity.FILL, 0, 0);
+            toast.setGravity(Gravity.FILL,0,0);
+            toast.setDuration(Toast.LENGTH_LONG);
+            toast.setView(layout);
+            toast.show();
         }
     }
 
-    public void restoreActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        actionBarDrawerToggle.syncState();
     }
 
+
+
+    public void showHideFragment(Fragment fragmentShow, Fragment fragmentHide1, Fragment fragmentHide2){
+
+        if (fragmentHide1.isVisible()) {
+            getSupportFragmentManager().beginTransaction().setCustomAnimations(android.R.anim.fade_in,
+                    android.R.anim.fade_out).hide(fragmentHide1).commit();
+        }
+        if (fragmentHide2.isVisible()) {
+            getSupportFragmentManager().beginTransaction().setCustomAnimations(android.R.anim.fade_in,
+                    android.R.anim.fade_out).hide(fragmentHide2).commit();
+        }
+
+
+        if (!fragmentShow.isAdded()) {
+            getSupportFragmentManager().beginTransaction().setCustomAnimations(android.R.anim.fade_in,
+                    android.R.anim.fade_out).add(R.id.mainContainer, fragmentShow).addToBackStack("oh").commit();
+        } else if (fragmentShow.isHidden()) {
+            getSupportFragmentManager().beginTransaction().setCustomAnimations(android.R.anim.fade_in,
+                    android.R.anim.fade_out).show(fragmentShow).addToBackStack("oh").commit();
+        }
+    }
 
 
 }

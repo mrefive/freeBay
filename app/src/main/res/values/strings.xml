@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Free Bay</string>
 
+    <string name="drawer_open">drawer open</string>
+    <string name="drawer_close">drawer close</string>
+
     <string name="title_section1">Create an offer</string>
     <string name="title_section2">Search for offers</string>
     <string name="title_section3">Profile</string>
@@ -35,8 +38,18 @@
     <string name="tVfiller1">Take a picture of your offer by touching the camera icon</string>
     <string name="tVfiller2">Chose a category and fill the forms</string>
     <string name="tVfiller3">Submit your order and wait for a happy taker</string>
+    <string name="title_activity_camera_for_offer">CameraForOffer</string>
 
+    <string name="submitnoconnection">No internet connection. Please try again</string>
 
+    <!-- ImageToServer.java Strings -->
+    <string name="ResponseToast">Successfully uploaded</string>
 
+    <!-- camera_for_offer_activity Strings -->
+    <string name="noCamerafound">Your device features no camera..</string>
+    <string name="noFlashAvailable">No flash available here..</string>
+
+    <!-- toast Strings -->
+    <string name="toastnoconnection">No internet connection. \nSome features may not be available.</string>
 
 </resources>

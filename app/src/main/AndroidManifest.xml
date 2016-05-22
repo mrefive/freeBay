@@ -11,6 +11,11 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <uses-feature android:name="android.hardware.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-feature android:name="android.hardware.camera.flash" />
+    <uses-feature android:name="android.hardware.camera.front" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -32,7 +37,12 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAfs0cVW_D9f6AIhD8m43p5PFPnYHVExT4" />
 
-        <activity android:name=".OfferMenuActivity"></activity>
+        <activity android:name=".OfferMenuActivity" />
+        <activity
+            android:name=".Camera.CameraForOffer"
+            android:screenOrientation="portrait"
+            android:theme="@style/CameraActivity"
+            />
     </application>
 
 </manifest>

@@ -80,7 +80,7 @@ public class OfferMenuActivity extends Activity {
                                 //delete from server
 
                                 DeleteOwnOfferFromServer deleteOwnOfferFromServer = new DeleteOwnOfferFromServer(context);
-                                deleteOwnOfferFromServer.execute(UUIDString, UOIDString);
+                                deleteOwnOfferFromServer.execute(UOIDString);
 
 
                                 //Toast.makeText(context,"Entry removed", Toast.LENGTH_LONG).show();

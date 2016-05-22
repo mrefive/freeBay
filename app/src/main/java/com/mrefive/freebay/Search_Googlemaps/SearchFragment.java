@@ -222,6 +222,9 @@ public class SearchFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    public String getTitle() {
+        return "Search for offers";
+    }
 
 
 }

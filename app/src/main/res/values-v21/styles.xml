@@ -1,0 +1,45 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+
+        <!-- Customize your theme here. -->
+
+
+        <!--
+        <item name="windowActionBarOverlay">false</item>
+        <item name="android:windowActionBarOverlay">false</item>
+        -->
+
+        <!-- makes background darker?
+        <item name="android:windowBackground">@android:color/transparent</item>
+        -->
+
+        <!-- <item name="android:colorBackgroundCacheHint">@null</item>
+        -->
+
+        <!-- makes background translucent to see main menu etc
+        <item name="android:windowIsTranslucent">true</item>
+        -->
+
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:statusBarColor">#b40c1cd4</item>
+
+    </style>
+
+    <style name="CameraActivity" parent="Theme.AppCompat">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:statusBarColor">#df555766</item>
+    </style>
+
+
+</resources>
