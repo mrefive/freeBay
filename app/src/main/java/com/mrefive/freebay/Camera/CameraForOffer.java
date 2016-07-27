@@ -287,7 +287,7 @@ public class CameraForOffer extends Activity {
                     out.flush();
                     out.close();
                 } catch (Exception e) {
-                    Log.d("ComeraForOffer", "File was not overwritten by croppen rotated jpeg....");
+                    Log.d("ComeraForOffer", "File was not overwritten by cropped rotated jpeg....");
                     e.printStackTrace();
                 }
 
@@ -326,9 +326,7 @@ public class CameraForOffer extends Activity {
         mediaFile= new File(mediaStorageDir.getPath() + File.separator + fileName);
 
         return mediaFile;
-
     }
-
 
     private class SaveImageTask extends AsyncTask<byte[], Void, Void> {
         @Override

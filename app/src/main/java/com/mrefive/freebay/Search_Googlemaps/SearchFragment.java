@@ -3,6 +3,10 @@ package com.mrefive.freebay.Search_Googlemaps;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -18,6 +22,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -30,6 +37,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Created by mrefive on 11/4/15.
@@ -37,13 +45,18 @@ import java.util.ArrayList;
 public class SearchFragment extends Fragment implements OnMapReadyCallback {
 
     //variables
-    double lat,lng;
+    private double lat,lng;
 
     private String UUID, UOID, category, title, descr, timeput, dateput, timedue, datedue, lati, lngi;
 
     private String offerJSONobject;
 
+    private GoogleMap googleMap;
+
     private ArrayList<String> ReceivedOffers;
+
+    private ArrayList<OfferObject> tempoffers;
+    private ArrayList<Marker> markeroffers;
 
     //com.google.android.gms.maps.MapFragment mapFragment;
     SupportMapFragment mapFragment;
@@ -51,39 +64,15 @@ public class SearchFragment extends Fragment implements OnMapReadyCallback {
 
     GetMapMarkers getMapMarkers;
 
-    //Bundle argsSearchfragment;
-    //Intent in;
-    //gps tracker for latlng?
-
-    //android.support.v4.app.Fragment mapFragment;
-
-
-
-    //private static final String TAG_MYMAPFRAGMENT = "TAG_MyMapFragment";
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        lat = getArguments().getDouble("lat");
-        lng = getArguments().getDouble("lng");
-        //FragmentManager myFragmentManager = getContext().getSupportFragmentManager();
-        myFragmentManager = getFragmentManager();
-        //argsSearchfragment = this.getArguments();
-        //System.out.println("------------------------------------SearchFragment" + argsSearchfragment.getDouble("lat"));
-        //System.out.println("------------------------------------SearchFragment" + getArguments().getDouble("lat"));
-        System.out.println("------------------------------------SearchFragment" + lng);
-        //mapFragment= (MapFragment) myFragmentManager.findFragmentByTag(TAG_MYMAPFRAGMENT);
-        //mapFragment= (SupportMapFragment) myFragmentManager.findFragmentByTag(TAG_MYMAPFRAGMENT);
+        tempoffers = new ArrayList<>();
+        markeroffers = new ArrayList<>();
 
-        /*
-        if(mapFragment == null) {
-            mapFragment = SupportMapFragment.newInstance();
-            FragmentTransaction fragmentTransaction = myFragmentManager.beginTransaction();
-            fragmentTransaction.add(android.R.id.content, mapFragment, TAG_MYMAPFRAGMENT);
-            fragmentTransaction.commit();
-        }
-        */
+        myFragmentManager = getFragmentManager();
+
         if(mapFragment == null) {
             mapFragment = SupportMapFragment.newInstance();
             //mapFragment.setArguments(argsSearchfragment);
@@ -122,35 +111,46 @@ public class SearchFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap map) {
-        System.out.println("------------------------SearchFragment onMapready");
 
-
+        System.out.println("SearchFragment onResume");
+        Log.d("SearchFragment", "SearchFragment onResume");
 
         //right upper corner, location layer activated
-        map.setMyLocationEnabled(true);
+        googleMap = map;
+        googleMap.setMyLocationEnabled(true);
 
-        //get latlng from mainActivity
-        //lat=this.getArguments().getDouble("lat");
-        //lng=this.getArguments().getDouble("lng");
-        //lat=argsSearchfragment.getLong("lat");
-        //lng=argsSearchfragmechronized between threadnt.getLong("lng");
-        //lat=gpsTracker.getLatitude();
-        //lng=gpsTracker.getLongitude();
+        //use UISettings for further buttons etc
+        googleMap.getUiSettings().setZoomControlsEnabled(true);
 
-        Log.d("SearchFragment", "Location is: "+Double.toString(lat));
-        LatLng myLocation = new LatLng(lat,lng);
-        //map.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 10));
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 11));
+        googleMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+            @Override
+            public void onCameraChange(CameraPosition cameraPosition) {
+                Log.d("SearchFragment","CAMERACHANGELISTENER FTW");
+                Log.d("SearchFragment", "ZOOM = "+googleMap.getCameraPosition().zoom);
 
-        //asynctask
-        SetMarkers setMarkers = new SetMarkers();
-        setMarkers.execute(map);
+                googleMap.clear();
+                int count = 0;
+                while(count<markeroffers.size()) {
+                    googleMap.addMarker(getMarkerOptions(tempoffers.get(count), (long) googleMap.getCameraPosition().zoom));
+                    count++;
+                }
+            }
+        });
 
-        System.out.println("------------------------SearchFragment onMapready Ends");
+        //map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 11));
+        GetOwnLocation getOwnLocation = new GetOwnLocation() {
+            @Override
+            protected void onPostExecute(Location location) {
+                lat = location.getLatitude();
+                lng = location.getLongitude();
+                //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 11));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 11));
+                updateMap();
+            }
+        };
+        getOwnLocation.execute();
 
     }
-
-
 
     @Override
     public void onDetach() {
@@ -162,63 +162,122 @@ public class SearchFragment extends Fragment implements OnMapReadyCallback {
         super.onAttach(context);
     }
 
-    public class SetMarkers extends AsyncTask<GoogleMap, Void, GoogleMap> {
+    private void updateMap() {
+        GetMapOffers getMapOffers = new GetMapOffers(getContext()){
+            @Override
+            public void onPostExecute(String result) {
+                try {
+                    JSONObject jsonObject = new JSONObject(result);
+                    JSONArray jsonArray = jsonObject.getJSONArray("server_response");
 
-        @Override
-        protected GoogleMap doInBackground(GoogleMap... maps) {
-            try {
-                getMapMarkers = new GetMapMarkers(getContext());
-                offerJSONobject = getMapMarkers.getOffersInRechJSONstring(lat,lng);
-                Log.d("SearchFragment","offerJSONstring: " + offerJSONobject);
+                    int count = 0;
+                    while(count<jsonArray.length()) {
+                        boolean alreadyadded = false;
+                        OfferObject offerObject = new OfferObject();
+                        JSONObject JO = jsonArray.getJSONObject(count);
 
-                return maps[0];
+                        int helper;
+                        for(helper=0; helper<tempoffers.size();helper++) {
+                            if(tempoffers!=null) {
+                                if(JO.getString("UOID").equals(tempoffers.get(helper).getUOID())){
+                                    alreadyadded = true;
+                                }
+                            }
+                        }
 
-            } catch (Exception e) {
+                        if(!alreadyadded) {
+                            offerObject.setUOID(JO.getString("UOID"));
+                            offerObject.setTitle(JO.getString("title"));
+                            offerObject.setDescr(JO.getString("description"));
+                            offerObject.setCategory(JO.getString("category"));
+                            offerObject.setDateend(JO.getString("dateput"));
+                            offerObject.setDateend(JO.getString("dateend"));
+                            offerObject.setLat(JO.getString("lat"));
+                            offerObject.setLng(JO.getString("lng"));
+                            offerObject.setImagename(JO.getString("imagename"));
+                            tempoffers.add(offerObject);
+                            //googleMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(offerObject.getOfferthumbnail())));
 
+                            Bitmap markericonbig = BitmapFactory.decodeResource(getResources(),R.drawable.beachicon);
+                            //googleMap.getCameraPosition().zoom;
+                            Bitmap markericon = Bitmap.createScaledBitmap(markericonbig, markericonbig.getWidth()/4, markericonbig.getHeight()/4,false);
+
+                            Marker marker = googleMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(offerObject.getLat()),Double.parseDouble(offerObject.getLng()))).icon(BitmapDescriptorFactory.fromBitmap(markericon)));
+                            markeroffers.add(marker);
+                        }
+
+                        //create Markers
+                        //maps.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(lati), Double.parseDouble(lngi))).snippet(title).title(title));
+                        Log.d("SearchFragment", "Marker created " + title);
+
+                        count++;
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
+        };
+        Log.d("SearchFragment","lat and lng = "+lat+" "+lng);
+        getMapOffers.execute(Double.toString(lat),Double.toString(lng));
+    }
 
-            return null;
+    private MarkerOptions getMarkerOptions(OfferObject offerObject,long zoom){
+
+        double scaler;
+        if(zoom>15){
+            scaler = (float)1.5;
+        } else if(zoom>6) {
+            scaler=((((float)-1)*((float)5/(float)9))*(float)zoom)+(float)9.9;
+        } else {
+        //} else if(zoom<=5){
+            scaler=(float)6.5;
+        }
+        Log.d("SearchFragment","SCALER = "+scaler);
+        Bitmap markericontemp = BitmapFactory.decodeResource(getResources(),R.drawable.beachicon);
+        MarkerOptions markerOptions= new MarkerOptions().position(new LatLng(Double.parseDouble(offerObject.getLat()), Double.parseDouble(offerObject.getLng()))).title(offerObject.getTitle()).icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(markericontemp, (int)(markericontemp.getWidth()/scaler), (int)(markericontemp.getHeight()/scaler), false)));
+
+        return markerOptions;
+    }
+
+    private Location getLastBestLocation() {
+
+        Log.d("SearchFragment","GETLASTBESTLOCATION EXECUTED");
+        LocationManager locationManager = (LocationManager)
+                getActivity().getSystemService(Context.LOCATION_SERVICE);
+        Location locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        //Log.d("SearchFragment", "LAtITUDE GPS & LONGITUDE GPS "+locationGPS.getLatitude()+" & "+locationGPS.getLongitude());
+        Location locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        //Log.d("SearchFragment", "LAtITUDE NET & LONGITUDE NET "+locationNet.getLatitude()+" & "+locationNet.getLongitude());
+        Location bestLocation;
+
+        long GPSLocationTime = 0;
+        if (null != locationGPS) { GPSLocationTime = locationGPS.getTime(); }
+
+        long NetLocationTime = 0;
+
+        if (null != locationNet) {
+            NetLocationTime = locationNet.getTime();
         }
 
+        if ( 0 < GPSLocationTime - NetLocationTime ) {
+            bestLocation = locationGPS;
+        }
+        else {
+            bestLocation= locationNet;
+        }
+        return bestLocation;
+    }
+
+    private class GetOwnLocation extends AsyncTask<Void, Void, Location> {
         @Override
-        protected void onPostExecute(GoogleMap maps) {
+        protected Location doInBackground(Void... params) {
+            Location location=null;
 
-            try {
-                JSONObject jsonObject = new JSONObject(offerJSONobject);
-                JSONArray jsonArray = jsonObject.getJSONArray("server_response");
-
-                int count = 0;
-
-                while(count<jsonArray.length()) {
-                    JSONObject JO = jsonArray.getJSONObject(count);
-                    UUID = JO.getString("UUID");
-                    UOID = JO.getString("UOID");
-                    category= JO.getString("category");
-                    title = JO.getString("title");
-                    descr = JO.getString("descr");
-                    timeput= JO.getString("timeput");
-                    dateput = JO.getString("dateput");
-                    datedue = JO.getString("datedue");
-                    lati = JO.getString("lat");
-                    lngi = JO.getString("lng");
-
-                    //create Markers
-                    maps.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(lati), Double.parseDouble(lngi))).snippet(title).title(title));
-                    Log.d("SearchFragment", "Marker created " + title);
-
-                    count++;
-
-
-
-
-                }
-                Log.d("SearchFragment", jsonArray.length() + " marker created!!");
-
-                //Log.d("JSONtoLocalDB",jsonArray.length() + "rows into local DB inserted");
-
-            } catch (JSONException e) {
-                e.printStackTrace();
+            while(location==null) {
+                location=getLastBestLocation();
             }
+            return location;
         }
     }
 

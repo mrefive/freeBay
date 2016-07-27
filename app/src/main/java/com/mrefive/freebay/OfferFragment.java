@@ -266,7 +266,7 @@ public class OfferFragment extends Fragment {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
                 String currentDateandTime = sdf.format(new Date()).replace(" ","");
                 FileOutputStream out = new FileOutputStream(Environment.getExternalStorageDirectory().getAbsolutePath() + "/bao/bao"+currentDateandTime+".jpg");
-                photo.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                photo.compress(Bitmap.CompressFormat.JPEG, 100, out);
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -421,9 +421,9 @@ public class OfferFragment extends Fragment {
                                 String[] data = new String[10];
                                 data[0] = UOID;
                                 data[1] = MainActivity.ANDROID_ID;
-                                data[2] = title.getText().toString();
-                                data[3] = descr.getText().toString();
-                                data[4] = categoriesSpinner.getSelectedItem().toString();
+                                data[2] = categoriesSpinner.getSelectedItem().toString();
+                                data[3] = title.getText().toString();
+                                data[4] = descr.getText().toString();
                                 data[5] = dateputin;
                                 data[6] = showDate.getText().toString();
                                 data[7] = lat;

@@ -5,5 +5,28 @@
     android:id="@+id/LinLayProfileFrag"
     android:gravity="center">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/status_bar_height"
+        android:id="@+id/frameLayoutProfile" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:id="@+id/frameLayoutProfile2" />
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout_profile"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/profileofferlistview"
+            />
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
 
 </LinearLayout>

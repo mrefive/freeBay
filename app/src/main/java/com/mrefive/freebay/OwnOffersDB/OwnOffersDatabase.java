@@ -1,16 +1,11 @@
 package com.mrefive.freebay.OwnOffersDB;
 
-import android.app.ActionBar;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-
-import com.mrefive.freebay.OwnOfferDataToServer;
-import com.mrefive.freebay.OwnOffers;
-import com.mrefive.freebay.OwnOffersDBtoListView;
 
 import java.io.File;
 
@@ -20,6 +15,7 @@ import java.io.File;
 public class OwnOffersDatabase extends SQLiteOpenHelper {
 
     public static final int database_version = 1;
+    private Context context;
 
 
     private String CREATE_QUERY = "CREATE TABLE "+ OwnOffersTableInfo.TableInfo.TABLE_NAME+ "("+ OwnOffersTableInfo.TableInfo.UOID+" TEXT,"+ OwnOffersTableInfo.TableInfo.UUID+" TEXT,"+ OwnOffersTableInfo.TableInfo.CATEGORY+" TEXT,"+ OwnOffersTableInfo.TableInfo.TITLE+" TEXT,"+ OwnOffersTableInfo.TableInfo.DESCRIPTION+" TEXT,"+ OwnOffersTableInfo.TableInfo.DATEPUT+" TEXT,"+ OwnOffersTableInfo.TableInfo.DATEEND+" TEXT,"+ OwnOffersTableInfo.TableInfo.LAT+" TEXT,"+ OwnOffersTableInfo.TableInfo.LNG+ " TEXT,"+ OwnOffersTableInfo.TableInfo.IMGNAME+ " TEXT);";
@@ -27,9 +23,7 @@ public class OwnOffersDatabase extends SQLiteOpenHelper {
 
     public OwnOffersDatabase(Context context) {
         super(context, OwnOffersTableInfo.TableInfo.DB_NAME, null, database_version);
-        Log.d("Database operations", "Database freebay_own_offers_local_db created");
-        Log.d("OwnOffersDatabase", "Table create Query: " + CREATE_QUERY);
-
+        this.context=context;
     }
 
     @Override
@@ -51,8 +45,8 @@ public class OwnOffersDatabase extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
 
         //choose column and define value to add there
-        contentValues.put(OwnOffersTableInfo.TableInfo.UOID, UUID);
-        contentValues.put(OwnOffersTableInfo.TableInfo.UUID, UOID);
+        contentValues.put(OwnOffersTableInfo.TableInfo.UOID, UOID);
+        contentValues.put(OwnOffersTableInfo.TableInfo.UUID, UUID);
         contentValues.put(OwnOffersTableInfo.TableInfo.CATEGORY, category);
         contentValues.put(OwnOffersTableInfo.TableInfo.TITLE, title);
         contentValues.put(OwnOffersTableInfo.TableInfo.DESCRIPTION, description);
@@ -94,9 +88,9 @@ public class OwnOffersDatabase extends SQLiteOpenHelper {
 
         SQLiteDatabase sqLiteDatabase = ownOffersDatabase.getWritableDatabase();
 
-        String sql_query = "DELETE FROM " + OwnOffersTableInfo.TableInfo.TABLE_NAME + " WHERE UOID = '" +UOID +"'";
-        sqLiteDatabase.execSQL(sql_query);
-
+        String whereclause = "UOID =?";
+        String[] whereargs = new String[] {UOID};
+        sqLiteDatabase.delete(OwnOffersTableInfo.TableInfo.TABLE_NAME, whereclause, whereargs);
     }
 
 
@@ -133,5 +127,18 @@ public class OwnOffersDatabase extends SQLiteOpenHelper {
         return dbFile.exists();
     }
 
+    public boolean checklocaldbforentries(OwnOffersDatabase ownOffersDatabase) {
+        SQLiteDatabase sqLiteDatabase = ownOffersDatabase.getWritableDatabase();
+        String[] columns = {"UOID"};
+        Cursor cursor=sqLiteDatabase.query(OwnOffersTableInfo.TableInfo.TABLE_NAME, columns, null,null,null,null,null);
+        cursor.moveToFirst();
+        if(cursor.getCount() <= 0){
+            cursor.close();
+            return false;
+        }
+        cursor.close();
+        return true;
+
+    }
 
 }

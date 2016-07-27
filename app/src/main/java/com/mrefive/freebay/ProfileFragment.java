@@ -1,18 +1,25 @@
 package com.mrefive.freebay;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v4.app.FragmentActivity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SlidingPaneLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -20,10 +27,13 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mrefive.freebay.OwnOffersDB.OwnOffersDatabase;
+import com.mrefive.freebay.OwnOffersDB.OwnOffersSync;
+import com.mrefive.freebay.OwnOffersDB.OwnOffersSyncImage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,12 +54,15 @@ public class ProfileFragment extends Fragment {
 
     private TextView showCountOfPosts;
     private LinearLayout linearLayoutProfFrag;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private ListView listvieownoffers;
+    private ScrollView scrollView;
 
     //instances
-    private OwnOffersDatabase ownOffersDatabase;
-    private OwnOffersDBtoListView ownOffersDBtoListView;
     private SharedPreferences prefs;
     private View view;
+
+    private boolean onresumecalled = false;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -62,7 +75,6 @@ public class ProfileFragment extends Fragment {
         //getsharedprefs
         prefs = getContext().getSharedPreferences("com.mrefive.freebay", Context.MODE_PRIVATE);
         countOfPosts= prefs.getInt("countOfPosts", 0);
-
     }
 
     @Override
@@ -71,20 +83,29 @@ public class ProfileFragment extends Fragment {
 
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_profile, container, false);
-
         linearLayoutProfFrag = (LinearLayout) view.findViewById(R.id.LinLayProfileFrag);
+        listvieownoffers = (ListView) view.findViewById(R.id.profileofferlistview);
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout_profile);
+        //SwipeRefreshLayout.LayoutParams slp = new SwipeRefreshLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        //swipeRefreshLayout.setLayoutParams(slp);
 
-        ownOffersDatabase = new OwnOffersDatabase(getContext());
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateListView();
+                swipeRefreshLayout.setRefreshing(false);
+                Log.d("swiperefreshlayout", "SWIPESREFRESH TRIGGERED");
+            }
+        });
 
-        if(ownOffersDatabase.doesDatabaseExist(getContext())) {
-
-            updateListView();
-
-        } else {
-            Toast.makeText(getContext(), "No database available. Try again later", Toast.LENGTH_LONG).show();
-        }
-
-        Log.d("Profile Fragment", "Create View executed");
+        /*
+        swipeRefreshLayout.setColorSchemeColors(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+        */
+        //TODO SWIPETOREFRESH SET UP LISTVIEW NEW AND ONLY UPDATE CONTENT WITH ADAPTER adapter = new adapter , listview.setAdapter(adapter)...
+        //linearLayoutProfFrag.addView(swipeRefreshLayout);
 
         return view;
     }
@@ -93,6 +114,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        updateListView();
         //wen das fragment wieder aufgerufen wird hier rein
     }
 
@@ -100,22 +122,25 @@ public class ProfileFragment extends Fragment {
     public void onPause() {
         super.onPause();
         //when fragment.hide hier rein
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getActivity().getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.BLUE);
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        if(ownOffersDatabase.doesDatabaseExist(getContext())) {
-
+        updateListView();
+        syncofferswithserver();
+        /*
+        if(onresumecalled) {
             updateListView();
-
-        } else {
-            Toast.makeText(getContext(), "No database available. Try again later", Toast.LENGTH_LONG).show();
         }
-
-        Log.d("Profile Fragment", "OnResume executed");
-
+        onresumecalled=true;
+        */
     }
 
     @Override
@@ -134,37 +159,77 @@ public class ProfileFragment extends Fragment {
         public void onFragmentInteraction(Uri uri);
     }
 
-
-    private void setViewLayout(int id){
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        view = inflater.inflate(id, null);
-        ViewGroup rootView = (ViewGroup) getView();
-        rootView.removeAllViews();
-        rootView.addView(view);
-
-    }
-
     public String getTitle() {
         return "Profile";
     }
 
     private void updateListView() {
-        ownOffersDBtoListView = new OwnOffersDBtoListView(getContext());
-        ownOffersDBtoListView.createListView();
-        linearLayoutProfFrag.addView(ownOffersDBtoListView.getListView());
+        OwnOffersDatabase ownOffersDatabase = new OwnOffersDatabase(getContext());
+        if (ownOffersDatabase.checklocaldbforentries(ownOffersDatabase)) {
 
-        ownOffersDBtoListView.getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("ProfileFragment", " List item clicked : #" +position + "id: " +id);
-                Bundle bundle = new Bundle();
-                bundle.putInt("listViewPosition", position);
+            OwnOffersListView owndbtlv = new OwnOffersListView(getContext());
+            owndbtlv.fillListView(listvieownoffers);
+            /*linearLayoutProfFrag.removeAllViews();
+            linearLayoutProfFrag.addView(owndbtlv.getListView());
+            */
+            //swipeRefreshLayout.addView(owndbtlv.getListView());
 
-                Intent intent = new Intent(getContext(), OfferMenuActivity.class);
-                intent.putExtras(bundle);
-                startActivity(intent);
-            }
-        });
+            owndbtlv.updateListEntry();
+
+            //TODO MOVE ONCLICKLISteNER TO OWNOFFERSLISTVIEWADAPTER AND TRY IF IT WORKS
+            owndbtlv.getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Log.d("ProfileFragment", " List item clicked : #" + position + "id: " + id);
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("listViewPosition", position);
+
+                    Intent intent = new Intent(getContext(), OfferMenuActivity.class);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                }
+            });
+
+        } else {
+            Toast.makeText(getContext(), "No Offers. Please create one.", Toast.LENGTH_LONG).show();
+        }
     }
 
+    public void syncofferswithserver() {
+        //add check for internet !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        //download offers from server
+        try {
+            OwnOffersSync ownOffersSync = new OwnOffersSync(getContext()) {
+                @Override
+                protected void onPostExecute(String s) {
+                    super.onPostExecute(s);
+                    if(!super.imagenames.isEmpty()) {
+                        int i=0;
+                        while(i<super.imagenames.size()){
+                            downloadandsaveimagesAsynctask(super.imagenames.get(i));
+                            i++;
+                        }
+                        updateListView();
+                    } else {
+
+                    }
+                }
+            };
+            ownOffersSync.execute(ownOffersSync.createUOIDJSON());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void downloadandsaveimagesAsynctask(String imagename){
+        OwnOffersSyncImage ownOffersSyncImage = new OwnOffersSyncImage() {
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                updateListView();
+            }
+        };
+        ownOffersSyncImage.execute(MainActivity.ANDROID_ID, imagename);
+    }
 }

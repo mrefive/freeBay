@@ -20,9 +20,6 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="offermenutitletitle">Title</string>
-    <string name="offermenudescrtitle">Description</string>
-
 
     <!-- Dialog Strings -->
     <string name="dialogok">OK</string>
@@ -34,6 +31,15 @@
     <string name="tVdescrtitle">Describe your offer</string>
     <string name="tVdatetitle">End date</string>
 
+    <!-- ProfileFragment Strings -->
+    <string name="noentries">No Offers. Please create one.</string>
+
+    <!-- fragment_profile.xml Strings -->
+    <string name="proflvtitletitle">Title:</string>
+    <string name="proflvtitledescr">Description:</string>
+    <string name="proflvtitledateends">Ends:</string>
+
+    <!-- OfferFragment Strings -->
     <string name="tVfillerTitle">How to place an offer:</string>
     <string name="tVfiller1">Take a picture of your offer by touching the camera icon</string>
     <string name="tVfiller2">Chose a category and fill the forms</string>
@@ -48,6 +54,11 @@
     <!-- camera_for_offer_activity Strings -->
     <string name="noCamerafound">Your device features no camera..</string>
     <string name="noFlashAvailable">No flash available here..</string>
+
+    <!-- ACTIVITY OFFER MENU STRINGS -->
+    <string name="dateendtitle">This offer ends:</string>
+    <string name="offermenutitletitle">Title</string>
+    <string name="offermenudescrtitle">Description</string>
 
     <!-- toast Strings -->
     <string name="toastnoconnection">No internet connection. \nSome features may not be available.</string>

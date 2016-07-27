@@ -9,6 +9,7 @@
          https://developer.android.com/design/patterns/navigation-drawer.html -->
     <dimen name="navigation_drawer_width">240dp</dimen>
     <dimen name="status_bar_height">25dp</dimen>
+    <dimen name="navigation_bar_height">48dp</dimen>
 
 
     <!-- CameraForOffer -->

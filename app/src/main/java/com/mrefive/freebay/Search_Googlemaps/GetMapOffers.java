@@ -1,13 +1,11 @@
-package com.mrefive.freebay.OwnOffersDB;
+package com.mrefive.freebay.Search_Googlemaps;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.mrefive.freebay.MainActivity;
-import com.mrefive.freebay.OwnOffersDB.JSONtoLocalDB;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -16,7 +14,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -24,35 +21,30 @@ import java.net.URLEncoder;
 import javax.net.ssl.HttpsURLConnection;
 
 /**
- * Created by mrefive on 1/7/16.
+ * Created by mrefive on 6/14/16.
  */
-public class DeleteOwnOfferFromServer extends AsyncTask <String, Void, String> {
+public class GetMapOffers extends AsyncTask<String, Void, String> {
 
 
     private String urllink;
-    private String UOID;
+    private String UUID;
+    private String lat, lng;
 
     private Context context;
 
     SharedPreferences sharedPreferences;
 
-    public DeleteOwnOfferFromServer(Context context) {
-        sharedPreferences = context.getSharedPreferences("com.mrefive.freebay", Context.MODE_PRIVATE);
-
+    public GetMapOffers(Context context) {
         this.context = context;
-    }
-
-    @Override
-    public void onPreExecute() {
-        super.onPreExecute();
     }
 
     @Override
     public String doInBackground(String... params) {
 
-        UOID = params[0];
+        lat = params[0];
+        lng = params[1];
 
-        urllink = "https://sommer.kdt-hosting.ch/freebay/deleteOffer.php";
+        urllink = "https://sommer.kdt-hosting.ch/freebay/getoffersinreach.php";
 
         try {
             //timer
@@ -69,7 +61,9 @@ public class DeleteOwnOfferFromServer extends AsyncTask <String, Void, String> {
             OutputStream OS = httpsURLConnection.getOutputStream();
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(OS, "UTF-8"));
             String data =
-                    URLEncoder.encode("UOID", "UTF-8") +"="+ URLEncoder.encode(UOID, "UTF-8");
+                    URLEncoder.encode("UUID", "UTF-8") + "=" + URLEncoder.encode(MainActivity.ANDROID_ID, "UTF-8")+"&"+
+                    URLEncoder.encode("lat", "UTF-8") + "=" + URLEncoder.encode(String.valueOf(lat), "UTF-8")+"&"+
+                    URLEncoder.encode("lng", "UTF-8") +"="+URLEncoder.encode(String.valueOf(lng), "UTF-8");
             bufferedWriter.write(data);
             bufferedWriter.flush();
             bufferedWriter.close();
@@ -117,6 +111,4 @@ public class DeleteOwnOfferFromServer extends AsyncTask <String, Void, String> {
     public void onPostExecute(String result) {
 
     }
-
-
 }

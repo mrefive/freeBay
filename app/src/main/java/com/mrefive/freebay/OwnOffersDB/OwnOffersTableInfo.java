@@ -12,8 +12,8 @@ public class OwnOffersTableInfo {
 
     public static abstract class TableInfo implements BaseColumns{
 
-        public static String UOID = "UUID";
-        public static String UUID = "UOID";
+        public static String UOID = "UOID";
+        public static String UUID = "UUID";
         public static String CATEGORY = "category";
         public static String TITLE = "title";
         public static String DESCRIPTION = "description";
@@ -22,8 +22,8 @@ public class OwnOffersTableInfo {
         public static String LAT = "lat";
         public static String LNG = "lng";
         public static String IMGNAME = "imgname";
-        public static String  DB_NAME = "freebay_own_offers_local_db";
-        public static String  TABLE_NAME = "own_offers_table";
+        public static String DB_NAME = "freebay_own_offers_local_db";
+        public static String TABLE_NAME = "own_offers_table";
 
 
     }

@@ -2,31 +2,107 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:drawable/dialog_holo_light_frame">
+    android:background="@android:drawable/dialog_holo_light_frame"
+    android:clickable="false">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="#b40c1cd4"
+        android:id="@+id/imagecontainer"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:id="@+id/profimageview"
+            android:layout_alignParentLeft="true"
+            android:adjustViewBounds="true"
+            android:layout_alignParentTop="true" />
+    </RelativeLayout>
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/proflvtitletitle"
+        android:id="@+id/titletitle"
+        android:textSize="13dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp"
+        android:textStyle="italic"
+        android:textColor="#24263c"
+        android:layout_toRightOf="@+id/imagecontainer" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/profLVname"
-        android:layout_alignParentLeft="true"
-        android:gravity="center"
+        android:gravity="top|left"
         android:textAppearance="?android:textAppearanceListItem"
         android:text="title"
-        android:paddingLeft="10dp"
-        android:paddingTop="5dp"
-    />
+        android:textSize="15dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="5dp"
+        android:textColor="#212e5a"
+        android:maxLength="20" />
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:id="@+id/profLVdescr"
+        android:layout_height="wrap_content"
+        android:id="@+id/titledateend"
+        android:gravity="top|left"
+        android:textAppearance="?android:textAppearanceListItem"
+        android:text="@string/proflvtitledateends"
+        android:textSize="13dp"
         android:layout_below="@+id/profLVname"
-        android:gravity="center"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:textStyle="italic"
+        android:textColor="#24263c"
+        android:layout_toRightOf="@+id/imagecontainer" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/profTVdateend"
+        android:layout_alignParentRight="true"
+        android:textSize="15dp"
+        android:layout_below="@+id/titletitle"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:textColor="#212e5a" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/proflvtitledescr"
+        android:id="@+id/titledescr"
+        android:textSize="13dp"
+        android:layout_marginLeft="5dp"
+        android:layout_below="@+id/profTVdateend"
+        android:layout_marginTop="5dp"
+        android:textStyle="italic"
+        android:textColor="#24263c"
+        android:layout_toRightOf="@+id/imagecontainer" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/profLVdescr"
+        android:gravity="top|left"
         android:textAppearance="?android:textAppearanceSmall"
         android:text="description"
-        android:paddingLeft="10dp"
-        android:maxLines="1"
-        android:layout_marginBottom="5dp" />
+        android:maxLines="5"
+        android:textSize="13dp"
+        android:minLines="1"
+        android:layout_below="@+id/titledescr"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp"
+        android:textColor="#212e5a"
+        android:layout_marginBottom="10dp"
+        android:layout_toRightOf="@+id/imagecontainer" />
 
     <!--
     <ImageButton

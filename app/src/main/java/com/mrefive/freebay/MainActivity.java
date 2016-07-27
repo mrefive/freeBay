@@ -38,8 +38,6 @@ public class MainActivity extends AppCompatActivity {
      */
     SharedPreferences sharedPreferences;
 
-    GPSTracker gpsTracker;
-
     //drawer toolbar
     Toolbar toolbar;
     DrawerLayout drawerLayout;
@@ -64,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean stateProfileFragment=false;
     private boolean stateSearchFragment=false;
 
+    private boolean internetconnection = false;
+
     private CharSequence mTitle;
 
     public static String ANDROID_ID;
@@ -71,18 +71,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //window options
-        //getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
-        //supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
 
-        //strictmode entfernt!!!!!!!!
-
+        //fyi strictmode wurde entfernt
 
         sharedPreferences = this.getSharedPreferences("com.mrefive.freebay", this.MODE_PRIVATE);
 
@@ -120,19 +114,21 @@ public class MainActivity extends AppCompatActivity {
             final AlertDialog alert = builder.create();
             alert.show();
         }
-
+        /*
         GPSTracker gpsTracker = new GPSTracker(this);
         argsSearchfragment = new Bundle();
         System.out.println("--------------------------------- lat= " + gpsTracker.getLatitude() + "lng = " + gpsTracker.getLongitude());
         argsSearchfragment.putDouble("lat", gpsTracker.getLatitude());
         argsSearchfragment.putDouble("lng", gpsTracker.getLongitude());
         searchFragment.setArguments(argsSearchfragment);
+        */
+
 
         //sset static vars
         ANDROID_ID = Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
         Log.d("Mainactivity", "Android ID = "+ ANDROID_ID);
-        MAXOWNOFFERS = 20;
+        MAXOWNOFFERS = 50;
 
         /*only check online DB when opening profilefragment
         //retrieve JSON from Server
@@ -184,10 +180,6 @@ public class MainActivity extends AppCompatActivity {
             View layout = inflater.inflate(R.layout.toastnoconnection,
                     (ViewGroup) findViewById(R.id.toastnoconnection_id));
 
-            // set a message
-            //TextView text = (TextView) layout.findViewById(R.id.text);
-            //text.setText("Button is clicked!");
-
             // Toast...
             Toast toast = new Toast(getApplicationContext());
             //toast.setGravity(Gravity.FILL, 0, 0);
@@ -195,6 +187,8 @@ public class MainActivity extends AppCompatActivity {
             toast.setDuration(Toast.LENGTH_LONG);
             toast.setView(layout);
             toast.show();
+        } else {
+            internetconnection = true;
         }
     }
 
@@ -220,10 +214,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (!fragmentShow.isAdded()) {
             getSupportFragmentManager().beginTransaction().setCustomAnimations(android.R.anim.fade_in,
-                    android.R.anim.fade_out).add(R.id.mainContainer, fragmentShow).addToBackStack("oh").commit();
+                    //android.R.anim.fade_out).add(R.id.mainContainer, fragmentShow).addToBackStack("oh").commit();
+                    android.R.anim.fade_out).add(R.id.mainContainer, fragmentShow).commit();
         } else if (fragmentShow.isHidden()) {
             getSupportFragmentManager().beginTransaction().setCustomAnimations(android.R.anim.fade_in,
-                    android.R.anim.fade_out).show(fragmentShow).addToBackStack("oh").commit();
+                    android.R.anim.fade_out).show(fragmentShow).commit();
         }
     }
 
